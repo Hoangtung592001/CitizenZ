@@ -24,7 +24,11 @@ class Validate {
                                 msg: 'Bạn nhập sai mật khẩu!',
                             })
                         }
-                        resolve(userInDb);
+                        resolve({
+                            error: false,
+                            msg: 'Đăng nhập thành công!',
+                            userInDb
+                        });
                     })
             })
             return response;

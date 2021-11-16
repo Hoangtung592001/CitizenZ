@@ -48,7 +48,43 @@ class SiteController {
             const user = req.body;
             Validate.user(user)
                 .then(async data => {
-                    return res.json(data);
+                    if (data.error) {
+                        return res.json(data);
+                    }
+                    const payload = {
+                        user: {
+                            id: data.userInDb.userId
+                        }
+                    }
+                    jwt.sign(
+                        payload,
+                        process.env.AUTH_SECRET,
+                        {
+                            expiresIn: 36000,
+                        },
+                        (err, token) => {
+                            if (err) throw err;
+                            const options = {
+                                expires: new Date(
+                                    Date.now() +
+                                        process.env.COOKIE_EXPIRE *
+                                            24 *
+                                            60 *
+                                            60 *
+                                            1000,
+                                ),
+                                httpOnly: true,
+                            };
+                            return res
+                                    .status(200)
+                                    .cookie('token', token, options)
+                                    .json({
+                                        error: false,
+                                        token,
+                                        user: data.userInDb.userId,
+                                    });
+                        }
+                    )
                 })
         }
         catch(err) {

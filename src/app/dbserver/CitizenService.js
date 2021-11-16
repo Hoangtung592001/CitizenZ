@@ -1,29 +1,30 @@
-const db = require('./models/model');
+const db = require('./models/Citizen_Model');
 
 db.connect();
 
-class UserService {
-    async addUser(user) {
+class CitizenService {
+
+    async addCitizen(citizen) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = 'INSERT INTO users SET ? ';
-                db.query(query, [user], (err, result) => {
+                const query = 'INSERT INTO citizens SET ? ';
+                db.query(query, [citizen], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
                 });
-            })
-            return response === 1 ? true : false;
+            });
+            return response;
         }
         catch(err) {
-            console.log(error);
+            console.log(err);
         }
-    }
+    }   
 
-    async getUserByUsername(username) {
+    async getCitizenById(id) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = 'SELECT * FROM users WHERE username = ?';
-                db.query(query, [username], (err, result) => {
+                const query = 'SELECT * FROM citizens WHERE citizen_id = ?';
+                db.query(query, [id], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 })
@@ -35,21 +36,22 @@ class UserService {
         }
     }
 
-    async addCitizen(citizen) {
+    async changeInfoCitizen(citizen) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = 'INSERT INTO citizens SET ? ';
+                const query = `UPDATE citizens` + 
+                ` SET ? WHERE citizen_id = "${citizen.citizen_id}"`;
                 db.query(query, [citizen], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
-                })
+                });
             });
             return response;
         }
         catch(err) {
             console.log(err);
         }
-    }   
+    }
 }
 
-module.exports = new UserService();
+module.exports = new CitizenService();
