@@ -28,29 +28,28 @@ class LevelController {
                         msg: 'No cities found'
                     })
                 }
-                let a = 0;
-                await cities.forEach((city) => {
-                    a++;
-                    const user = {};
-                    const role = 'A2';
-                    user.username = city.city_id;
-                    user.password = '123456789';
-                    user.role = role;
-                    UserService.addUser(user)
-                    .then(isCreated => {
-                        if (!isCreated) {
-                            res.status(400).json({
+
+                UserService.getUserByUsername(cities[0].city_id)
+                    .then(async hasUser => {
+                        if (hasUser[0]) {
+                            return res.status(400).json({
                                 error: true,
                                 msg: 'Chưa đăng kí được tài khoản',
                             });
                         }
+                        await cities.forEach((city) => {
+                            const user = {};
+                            const role = 'A2';
+                            user.username = city.city_id;
+                            user.password = '123456789';
+                            user.role = role;
+                            UserService.addUser(user)
+                        })
+                        res.status(400).json({
+                            error: false,
+                            msg: 'Đăng ký thành công!',
+                        });
                     })
-                })
-                res.status(200).json({
-                    a: a,
-                    error: false,
-                    msg: 'Cấp quyền cho các tỉnh thành công!'
-                });
             });
                 
                 
