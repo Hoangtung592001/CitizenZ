@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const db = require('../models/Site');
 
 module.exports = function(req, res, next) {
-    const accessToken = req.headers.authorization.split(' ')[1];
+    const accessToken = req.cookies.confirmChangePasswordToken;
     if (!accessToken) {
         return res.status(400).json({
             error: true,

@@ -64,7 +64,6 @@ class InformationController {
                 });
             })
     }
-
 }
 
 module.exports = new InformationController();

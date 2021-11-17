@@ -13,6 +13,21 @@ const cookieParser = require('cookie-parser');
 const server = http.createServer(app);
 const dotenv = require('dotenv');
 
+
+//
+//https://morioh.com/p/ca75996654d1
+
+
+// mail.sendMail(mailOptions, function(error, info){
+//     if (error) {
+//         console.log(error);
+//     } else {
+//         console.log('Email sent: ' + info.response);
+//     }
+// });
+
+
+
 dotenv.config({path: __dirname + '/.env'});
 
 const PORT = process.env.PORT || 3000;

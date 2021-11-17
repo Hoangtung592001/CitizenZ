@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const UserService = require('../dbserver/UserService');
 
 class Validate {
+    // Check whether username existed or wrong password.
     async user(user) {
         try {
             const response = await new Promise((resolve, reject) => {

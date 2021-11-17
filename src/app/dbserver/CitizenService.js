@@ -42,7 +42,7 @@ class CitizenService {
                 const query = `UPDATE citizens` + 
                 ` SET ? WHERE citizen_id = "${citizen.citizen_id}"`;
                 db.query(query, [citizen], (err, result) => {
-                    if (err) reject(new Error(err.message));
+                    if (err) resolve(false);
                     resolve(result.affectedRows);
                 });
             });
@@ -52,6 +52,7 @@ class CitizenService {
             console.log(err);
         }
     }
+    
 }
 
 module.exports = new CitizenService();
