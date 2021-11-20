@@ -7,4 +7,8 @@ router.get('/', LevelController.home);
 
 router.post('/decentralize_for_cities', auth, LevelController.decentralizeForCities);
 
+router.post('/decentralize_for_districts', auth, LevelController.decentralizeForDistricts)
+
+router.post('/decentralize_for_wards', auth, LevelController.decentralizeForWards);
+
 module.exports = router;

@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 module.exports = function(req, res, next) {
-    const accessToken = req.headers.authorization.split(' ')[1];
+    // const accessToken = req.headers.authorization.split(' ')[1] || 
+    const accessToken = req.cookies.token;
     if (!accessToken) {
         return res.status(400).json({
             error: true,

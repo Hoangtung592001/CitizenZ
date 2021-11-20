@@ -1,7 +1,7 @@
 const UserService = require('../dbserver/UserService');
+const EncryptService = require('../service/encryptService');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const bcrypt = require('bcrypt');
 const Validate = require('../service/validate');
 const sendByMail = require('../service/sendMessagesThroughGmail');
 class SiteController {
@@ -12,30 +12,22 @@ class SiteController {
     async signup(req, res, next) {
         try {
             const user = req.body;
-            UserService.getUserByUsername(user.username)
-                .then(async data => {
-                    if (data[0]) {
-                        return res.status(400).json({
-                            error: true,
-                            msg: 'Tài khoản đã tồn tại!',
-                        });
-                    }
-                    user.role = 'A1';
-                    UserService.addUser(user)
-                        .then(created => {
-                            if (!created) {
-                                return res.status(400).json({
-                                    error: true,
-                                    msg: 'Chưa đăng kí được tài khoản',
-                                });
-                            }
-                            res.status(201).json({
-                                error: false,
-                                msg: 'Đăng kí tài khoản thành công',
-                                user
-                            });
-                        })
-                });
+            user.role = 'A1';
+            UserService.addUser(user)
+                .then(created => {
+                    res.status(201).json({
+                        error: false,
+                        msg: 'Đăng kí tài khoản thành công',
+                        user
+                    });
+                })
+                .catch(err => {
+                    res.status(400).json({
+                        error: true,
+                        msg: 'Đăng kí tài khoản thất bại!',
+                        user
+                    });
+                }) 
         }
         catch(err) {
             res.status(500).send('server error ' + err.message);
@@ -173,7 +165,7 @@ class SiteController {
 
 
     async confirmForgetPassword(req, res, next) {
-
+        
     }
 }
 

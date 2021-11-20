@@ -5,24 +5,30 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 
 class InformationController {
-    /*
-        Số chứng minh nhân dân
-        Họ và tên
-        Năm sinh:
-        Giới tính
-        Nguyên Quán:
-            Tỉnh: city_id
-            Quận, Huyện: district_id
-            Xã, Phường: Ghi chi tiết
-        
-    */
     home(req, res, next) {
         res.send('Nhập liệu thành công!');
     }
-
-    declaration(req, res, next) {
+    
+    async declaration(req, res, next) {
+        const user = req.user.user;
+        // return res.json(user);
+        await CitizenService.canModify(user.username)
+            .then(canModify => {
+                if (canModify.error) {
+                    return res.json({
+                        error: true,
+                        msg: canModify.msg
+                    });
+                }
+            })
+        if (user.username.length !== 5) {
+            return res.json({
+                error: true,
+                msg: 'Bạn không có quyền truy cập miền này!'
+            })
+        };
         const citizen = req.body;
-        delete citizen.province_id, citizen.district_id;
+        citizen.ward_id = user.username;
         CitizenService.getCitizenById(citizen.citizen_id)
             .then(data => {
                 if (data[0]) {
@@ -31,7 +37,7 @@ class InformationController {
                         msg: 'Số chứng minh thư đã tồn tại!',
                     });
                 }
-                UserService.addCitizen(citizen)
+                CitizenService.addCitizen(citizen)
                     .then(isCreated => {
                         if (!isCreated) {
                             return res.status(400).json({

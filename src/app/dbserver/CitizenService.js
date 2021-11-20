@@ -1,4 +1,5 @@
 const db = require('./models/Citizen_Model');
+const UserService = require('./UserService');
 
 db.connect();
 
@@ -45,6 +46,39 @@ class CitizenService {
                     if (err) resolve(false);
                     resolve(result.affectedRows);
                 });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async canModify(username) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                UserService.getUserByUsername(username)
+                    .then(data => {
+                        const checkingUser = data[0];
+                        if (!checkingUser) {
+                            resolve({
+                                error: true,
+                                msg: 'Lỗi không tìm thấy người dùng!'
+                            });
+                        }
+                        if (!checkingUser.canModify) {
+                            resolve({
+                                error: true,
+                                msg: 'Tài khoản này bị khóa tất cả các quyền!'
+                            });
+                        }
+                        else {
+                            resolve({
+                                error: false,
+                                msg: 'Có quyền truy cập!'
+                            })
+                        }
+                    })
             });
             return response;
         }
