@@ -131,6 +131,40 @@ class InformationController {
                 res.json(cities);
             })
     }
+
+    async deleteCitizen(req, res, next) {
+        const user = req.user.user;
+        const citizen_id = req.params.citizen_id;
+        await CitizenService.getCitizenById(citizen_id)
+            .then(async citizen => {
+                if (!citizen[0]) {
+                    return res.json({
+                        error: true,
+                        msg: 'Người dùng không tồn tại!'
+                    });
+                }
+
+                if (citizen[0].ward_id !== user.username) {
+                    return res.json({
+                        error: true,
+                        msg: 'Tài khoản này không có quyền xóa người dùng này!'
+                    })
+                }
+                await CitizenService.deleteCitizen(citizen[0])
+                    .then(isDeleted => {
+                        if (!isDeleted) {
+                            return res.json({
+                                error: true,
+                                msg: 'Chưa thể xóa cư dân này!'
+                            })
+                        }
+                        return res.json({
+                            error: false,
+                            msg: 'Đã xóa cư dân này!'
+                        });
+                    })
+            })
+    }
 }
 
 module.exports = new InformationController();

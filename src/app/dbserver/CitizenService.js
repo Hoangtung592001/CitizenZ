@@ -13,6 +13,10 @@ class CitizenService {
                 db.query(query, [citizen], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
+                    const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${citizen.ward_id}`;
+                    db.query(addPopulationQuery, (err, isAdded) => {
+                        if (err) reject(new Error(err.message));
+                    })
                 });
             });
             return response;
@@ -20,7 +24,7 @@ class CitizenService {
         catch(err) {
             console.log(err);
         }
-    }   
+    }
 
     async getCitizenById(id) {
         try {
@@ -91,15 +95,32 @@ class CitizenService {
     async getCitizensOfCities() {
         try {
             const response = await new Promise((resolve, reject) => {
-                FindLocationService.getAllCities()
-                    .then(cities => {
-                        resolve(cities);
-                    })
+                
             });
             return response;
         }
         catch(err) {
             console.log(err);
+        }
+    }
+
+    async deleteCitizen(citizen) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = 'DELETE FROM citizens WHERE citizen_id = ?'
+                db.query(query, [citizen.citizen_id], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                    const deletePopulationQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${citizen.ward_id}`;
+                    db.query(deletePopulationQuery, (err, isDeleted) => {
+                        if (err) reject(new Error(err.message));
+                    })
+                })
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err.message);
         }
     }
 }

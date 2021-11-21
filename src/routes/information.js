@@ -10,6 +10,8 @@ router.post('/declaration', auth,  informationController.declaration);
 
 router.put('/change_info/:citizen_id', auth, informationController.changeInfo);
 
-
 router.get('/get_info_citizen_cities', auth, informationController.getInfoCitizenOfCities);
+
+router.delete('/delete_citizen/:citizen_id', auth, informationController.deleteCitizen);
+
 module.exports = router;
