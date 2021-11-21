@@ -49,12 +49,7 @@ class UserService {
                 const query = 'SELECT * FROM users WHERE username = ?';
                 db.query(query, [username], (err, result) => {
                     if (err) reject(new Error(err.message));
-                    if (!result[0]) {
-                        reject(new Error('Không tìm được thông tin nào!'))
-                    }
-                    else {
-                        resolve(result);
-                    }
+                    resolve(result);
                 })
             });
             return response;
@@ -73,6 +68,24 @@ class UserService {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
                 });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async checkPermission(username, role) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                this.getUserByUsername(username)
+                    .then(user => {
+                        if (!user[0]) {
+                            reject(new Error('Lỗi không tìm thấy người dùng!'));
+                        }
+                        resolve(user[0].role === role);
+                    })
             });
             return response;
         }

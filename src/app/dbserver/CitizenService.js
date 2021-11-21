@@ -1,5 +1,6 @@
 const db = require('./models/Citizen_Model');
 const UserService = require('./UserService');
+const FindLocationService = require('./FindLocationService');
 
 db.connect();
 
@@ -37,14 +38,14 @@ class CitizenService {
         }
     }
 
-    async changeInfoCitizen(citizen) {
+    async changeInfoCitizen(citizen_id, citizen) {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = `UPDATE citizens` + 
-                ` SET ? WHERE citizen_id = "${citizen.citizen_id}"`;
+                ` SET ? WHERE citizen_id = "${citizen_id}"`;
                 db.query(query, [citizen], (err, result) => {
-                    if (err) resolve(false);
-                    resolve(result.affectedRows);
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
                 });
             });
             return response;
@@ -87,6 +88,20 @@ class CitizenService {
         }
     }
     
+    async getCitizensOfCities() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                FindLocationService.getAllCities()
+                    .then(cities => {
+                        resolve(cities);
+                    })
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
 }
 
 module.exports = new CitizenService();
