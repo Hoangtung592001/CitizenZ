@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/Hoangtung592001/nodejs_blog#readme",
   "dependencies": {
+    "amqplib": "^0.8.0",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "cookies": "^0.8.0",

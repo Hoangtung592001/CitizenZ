@@ -3,6 +3,7 @@ const CitizenService = require('../dbserver/CitizenService');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
+const amqp = require("amqplib");
 
 class InformationController {
     home(req, res, next) {
@@ -97,7 +98,7 @@ class InformationController {
                                     if (!isChanged) {
                                         return res.status(400).json({
                                             error: true,
-                                            msg: 'Chưa thể thay đổi thông tin'
+                                            msg: 'Bạn nhập chứng minh thư đã bị trùng!'
                                         });
                                     }
                                     return res.status(200).json({
@@ -165,6 +166,28 @@ class InformationController {
                     })
             })
     }
+
+    async confirmChangeInfo(req, res, next) {
+        const amqpServer = "amqp://localhost:5672";
+        const connection = await amqp.connect(amqpServer);
+        const channel = await connection.createChannel();
+        const QUEUE = `sendConfirm`
+        await channel.assertQueue('confirmMessage');
+        channel.consume(QUEUE, (data) => {
+            channel.sendToQueue('confirmMessage', Buffer.from('OK!'));
+            return res.send(JSON.parse(data.content));
+        }, {
+            noAck: true
+        })
+    }
+    /*
+    getDistricts:
+    SELECT d.district_id, d.name, SUM(population) as population from districts d
+    JOIN wards w ON d.district_id = w.district_id
+    WHERE d.district_id = "001"
+    getWards:
+    SELECT * from wards;
+    */
 }
 
 module.exports = new InformationController();
