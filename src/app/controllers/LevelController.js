@@ -28,8 +28,6 @@ class LevelController {
                                 msg: 'Cấp trên đã cấp tài khoản cho các quận, huyện này!'
                             })
                         }
-                    })
-                    .catch(err => {
                         cities.forEach((city) => {
                             const user = {};
                             const role = 'A2';
@@ -38,10 +36,16 @@ class LevelController {
                             user.role = role;
                             UserService.addUser(user)
                         })
-                        res.status(200).json({
+                        return res.status(200).json({
                             error: false,
                             msg: 'Đăng ký thành công!',
                         });
+                    })
+                    .catch(err => {
+                        return res.json({
+                            error: true,
+                            msg: 'Có lỗi xảy ra'
+                        })
                     })
             })
             .catch(err => {
@@ -64,15 +68,12 @@ class LevelController {
             .then(districts => {
                 UserService.getUserByUsername(districts[0].district_id)
                     .then(user => {
-                        console.log('not err');
                         if (user[0]) {
                             return res.json({
                                 error: true,
                                 msg: 'Cấp trên đã cấp tài khoản cho các quận, huyện này!'
                             })
                         }
-                    })
-                    .catch(err => {
                         districts.forEach((district) => {
                             const user = {};
                             const role = 'A3';
@@ -85,6 +86,12 @@ class LevelController {
                             error: false,
                             msg: 'Đăng ký thành công!',
                         });
+                    })
+                    .catch(err => {
+                        return res.json({
+                            error: true,
+                            msg: 'Không tìm được thông tin các quận, huyện'
+                        })
                     })
                     
             })
@@ -115,8 +122,6 @@ class LevelController {
                                 msg: 'Cấp trên đã cấp tài khoản cho các quận, huyện này!'
                             })
                         }
-                    })
-                    .catch(err => {
                         wards.forEach((ward) => {
                             const user = {};
                             const role = 'A4';
@@ -129,6 +134,12 @@ class LevelController {
                             error: false,
                             msg: 'Đăng ký thành công!',
                         });
+                    })
+                    .catch(err => {
+                        return res.json({
+                            error: true,
+                            msg: 'Không tìm được thông tin các quận, huyện'
+                        })
                     })
                     
             })

@@ -1,10 +1,17 @@
 const UserService = require('../dbserver/UserService');
 const CitizenService = require('../dbserver/CitizenService');
+const FindLocationService = require('../dbserver/FindLocationService') 
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const amqp = require("amqplib");
+/*
+- Phân tích về tỷ lệ nam, nữ.
+- Phân tích về độ tuổi.
+- Phân tích về loại dân tộc.
+- Tình hình nhập liệu và hoàn thành nhập liệu.
 
+*/
 class InformationController {
     home(req, res, next) {
         res.send('Nhập liệu thành công!');
@@ -37,7 +44,17 @@ class InformationController {
                 })
             })
         const citizen = req.body;
+        if (!(citizen.citizen_id && citizen.citizen_name && citizen.current_address
+            && (citizen.gender === 'Nam' || citizen.gender === 'Nữ') 
+        )) {
+            return res.json({
+                error: true,
+                msg: 'Bạn nhập sai hoặc thiếu thông tin!'
+            });
+        }
         citizen.ward_id = user.username;
+        // return res.json(citizen);
+        // citizen.ethnic_id = Number(citizen.ethnic_id);
         CitizenService.getCitizenById(citizen.citizen_id)
             .then(data => {
                 if (data[0]) {
@@ -116,23 +133,6 @@ class InformationController {
             })
     }
 
-    async getInfoCitizenOfCities(req, res, next) {
-        const user = req.user.user;
-        await UserService.checkPermission(user.username, 'A1')
-            .then(havePermission => {
-                if (!havePermission) {
-                    return res.json({
-                        error: true,
-                        msg: 'Người dùng không có quyền xem!'
-                    })
-                }
-            })
-        await CitizenService.getCitizensOfCities()
-            .then(cities => {
-                res.json(cities);
-            })
-    }
-
     async deleteCitizen(req, res, next) {
         const user = req.user.user;
         const citizen_id = req.params.citizen_id;
@@ -180,14 +180,66 @@ class InformationController {
             noAck: true
         })
     }
-    /*
-    getDistricts:
-    SELECT d.district_id, d.name, SUM(population) as population from districts d
-    JOIN wards w ON d.district_id = w.district_id
-    WHERE d.district_id = "001"
-    getWards:
-    SELECT * from wards;
-    */
+
+    async test(req, res, next) {
+        const user = req.user.user;
+        UserService.declaringDoneForWard(user.username)
+            .then(districts => {
+                return res.json(districts);
+            })
+    }
+
+    async getInfoCitizenOfCities(req, res, next) {
+        const user = req.user.user;
+        await UserService.checkPermission(user.username, 'A1')
+            .then(havePermission => {
+                if (!havePermission) {
+                    return res.json({
+                        error: true,
+                        msg: 'Người dùng không có quyền xem!'
+                    })
+                }
+            })
+        await FindLocationService.getCitizensOfCities()
+            .then(cities => {
+                res.json(cities);
+            })
+    }
+
+    async getInfoCitizenOfDistricts(req, res, next) {
+        const user = req.user.user;
+
+        // await UserService.checkPermission(user.username, 'A2')
+        //     .then(havePermission => {
+        //         if (!havePermission) {
+        //             return res.json({
+        //                 error: true,
+        //                 msg: 'Người dùng không có quyền xem!'
+        //             })
+        //         }
+        //     })
+        await FindLocationService.getCitizensOfCities()
+            .then(cities => {
+                res.json(cities);
+            })
+    }
+
+    async declaringDone(req, res, next) {
+        const user = req.user.user;
+        UserService.declaringDoneForWard(user.username)
+            .then(isDone => {
+                if (!isDone) {
+                    return res.json({
+                        error: true,
+                        msg: 'Có lỗi xảy ra!'
+                    })
+                }
+                return res.json({
+                    error: false,
+                    msg: 'Khai báo thành công!'
+                })
+            })
+    }
 }
 
 module.exports = new InformationController();

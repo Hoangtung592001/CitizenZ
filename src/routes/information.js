@@ -4,6 +4,7 @@ const auth = require('../app/middlewares/auth');
 
 const informationController = require('../app/controllers/InformationController');
 
+router.get('/test', auth, informationController.test);
 
 router.post('/declaration', auth,  informationController.declaration);
 
@@ -14,6 +15,8 @@ router.get('/get_info_citizen_cities', auth, informationController.getInfoCitize
 router.delete('/delete_citizen/:citizen_id', auth, informationController.deleteCitizen);
 
 router.get('/confirm_changeInfo', auth, informationController.confirmChangeInfo);
+
+router.post('/declaringDone', auth, informationController.declaringDone);
 
 router.get('/', informationController.home);
 

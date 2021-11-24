@@ -13,11 +13,11 @@ class CitizenService {
                 const query = 'INSERT INTO citizens SET ? ';
                 db.query(query, [citizen], (err, result) => {
                     if (err) reject(new Error(err.message));
-                    resolve(result.affectedRows);
-                    const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${citizen.ward_id}`;
-                    db.query(addPopulationQuery, (err, isAdded) => {
-                        if (err) reject(new Error(err.message));
-                    })
+                    resolve(result);
+                    // const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${citizen.ward_id}`;
+                    // db.query(addPopulationQuery, (err, isAdded) => {
+                    //     if (err) reject(new Error(err.message));
+                    // })
                 });
             });
             return response;
@@ -72,14 +72,14 @@ class CitizenService {
                             db.query(updateQuery, [citizen], (err, result) => {
                                 if (err) reject(new Error(err.message));
                             });
-                            const deletePopulationQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${oldWard}`;
-                            db.query(deletePopulationQuery, (err, isDeleted) => {
-                                if (err) reject(new Error(err.message));
-                            })
-                            const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${newWard}`;
-                            db.query(addPopulationQuery, (err, isAdded) => {
-                                if (err) reject(new Error(err.message));
-                            })
+                            // const deletePopulationQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${oldWard}`;
+                            // db.query(deletePopulationQuery, (err, isDeleted) => {
+                            //     if (err) reject(new Error(err.message));
+                            // })
+                            // const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${newWard}`;
+                            // db.query(addPopulationQuery, (err, isAdded) => {
+                            //     if (err) reject(new Error(err.message));
+                            // })
                         })
                         resolve(true);
                     }, {
@@ -119,25 +119,6 @@ class CitizenService {
                             })
                         }
                     })
-            });
-            return response;
-        }
-        catch(err) {
-            console.log(err);
-        }
-    }
-    
-    async getCitizensOfCities() {
-        try {
-            const response = await new Promise((resolve, reject) => {
-                const query = 'SELECT c.city_id, c.name, SUM(w.population) as population FROM cities c' +
-                ' JOIN districts d ON c.city_id = d.city_id' +
-                ' JOIN wards w ON d.district_id = w.district_id' +
-                ' GROUP BY c.city_id';
-                db.query(query, (err, cities) => {
-                    if (err) reject(new Error(err.message));
-                    resolve(cities);
-                })
             });
             return response;
         }
