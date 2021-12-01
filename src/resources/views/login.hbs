@@ -1,0 +1,83 @@
+<form class="formLogin" method="POST" action="/login">
+    <div class="form-group">
+        <label for="exampleInputEmail1">Tài khoản</label>
+        <input type="text" class="form-control" name="username" placeholder="Nhập tài khoản">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Mật khẩu</label>
+        <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const formLogin = document.querySelector('.formLogin');
+        formLogin.onsubmit = function(e) {
+            e.preventDefault();
+            formLogin.submit();
+        }
+    });
+</script>
+
+{{!-- <div class="body">
+    <div id="container">
+        <div id="dangnhap">
+            <div id="dau">
+                <img src="images/dangcongsan.png" alt="Đảng Cộng Sản">
+                <div>
+                    Hệ Thống Quản Lý Dân Số
+                </div>
+            </div>
+            <div id="than">
+                <div class="flex-item" id="flex1">
+                    <img src="images/danso.png" alt="Đảng Cộng Sản">
+                    <div >
+                        CitizenV - Ứng dụng công nghệ vào quản lý dân số
+                    </div>
+                </div>
+                <div class="flex-item" id="flex2">
+                    <div id="pp">Sử dụng tài khoản bạn được cung cấp</div>
+                    <div class="dangnhap">
+                        <input type="text" placeholder="Tên tài khoản" id="taikhoan">
+                    </div>
+                    <div class="dangnhap" id="password">
+                        <input type="password" placeholder="Mật khẩu">
+                    </div>
+                    <div class="dangnhap" id="login">
+                        <button type="button" onclick="login(this)">Đăng nhập</button>
+                    </div>
+                    <div id="forget">
+                        <button type="button" onclick="forget(this)">Quên mật khẩu ?</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function forget(x) {
+        x.style.display = 'none';
+        var dangnhap = document.getElementById('login').getElementsByTagName('button')[0];
+        dangnhap.innerHTML = 'Gửi xác nhận';
+        var password = document.getElementById('password');
+        password.style.display = 'none';
+    }
+    function login(x) {
+        if (x.innerHTML != "Đăng nhập") {
+            var tk = document.getElementById("taikhoan");
+            tk.value = tk.value.trim();
+            if (tk.value == "") {
+                alert('Bạn chưa nhập gì cả');
+                return;
+            }
+            x.innerHTML = "Đăng nhập";
+            var password = document.getElementById('password');
+            password.style.display = '';
+            var fg = document.getElementById('forget').getElementsByTagName('button')[0];
+            fg.style.display = "";
+            tk.value = "";
+        }
+    }
+</script> --}}

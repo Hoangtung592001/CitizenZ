@@ -1,0 +1,45 @@
+<table class="table">
+<thead>
+    <tr>
+    <th scope="col">STT</th>
+    <th scope="col">Tên Huyện</th>
+    <th scope="col">Tình trạng nhập liệu</th>
+    <th scope="col">Dân số</th>
+    </tr>
+</thead>
+<tbody class="ward__table">
+    {{#each wards}}
+    <tr>
+    <th scope="row">{{this.ward_id}}</th>
+    <td><a href="http://localhost:5000/{{this.ward_id}}/ward" class="link-secondary">{{this.name}}</a></td>
+    <td>{{processing this.declaringDone}}</td>
+    <td>{{this.population}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+</table>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const wardTable = document.querySelector('.ward__table');
+        const url = window.location.href.slice(0, 26);
+        const socket = io();
+
+        socket.on('chatMessage', ({ msg }) => {
+            fetch(url)
+                .then(data => data.json())
+                .then(wards => {
+                    wardTable.innerHTML = wards.map((ward) => {
+                        return `
+                            <tr>
+                                <th scope="row">${ward.ward_id}</th>
+                                <td><a href="http://localhost:5000/${this.ward_id}/ward" class="link-secondary">${this.name}</a></td>
+                                <td>${ward.declaringDone ? 'Nhập liệu thành công!' : 'Đang nhập liệu!'}</td>
+                                <td>${ward.population}</td>
+                            </tr>
+                            `
+                    }).join('');
+                })
+        })
+    });
+</script>

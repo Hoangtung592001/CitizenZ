@@ -1,0 +1,46 @@
+<table class="table">
+<thead>
+    <tr>
+    <th scope="col">STT</th>
+    <th scope="col">Tên Huyện</th>
+    <th scope="col">Tình trạng nhập liệu</th>
+    <th scope="col">Dân số</th>
+    </tr>
+</thead>
+<tbody class="district__table">
+    {{#each districts}}
+    <tr>
+    <th scope="row">{{this.district_id}}</th>
+    <td><a href="http://localhost:5000/{{this.district_id}}/district" class="link-secondary">{{this.name}}</a></td>
+    <td>{{processing this.declaringDone}}</td>
+    <td>{{this.population}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+</table>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const districtTable = document.querySelector('.district__table');
+        const url = window.location.href.slice(0, 24);
+        const socket = io();
+        console.log(url);
+        socket.on('chatMessage', ({ msg }) => {
+            console.log(msg);
+            fetch(url)
+                .then(data => data.json())
+                .then(districts => {
+                    districtTable.innerHTML = districts.map((district) => {
+                        return `
+                            <tr>
+                                <th scope="row">${district.district_id}</th>
+                                <td><a href="${district.district_id}/district" class="link-secondary">${district.name}</a></td>
+                                <td>${district.declaringDone ? 'Nhập liệu thành công!' : 'Đang nhập liệu!'}</td>
+                                <td>${district.population}</td>
+                            </tr>
+                            `
+                    }).join('');
+                })
+        })
+    });
+</script>

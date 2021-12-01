@@ -4,9 +4,125 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const Validate = require('../service/validate');
 const sendByMail = require('../service/sendMessagesThroughGmail');
+const FindLocationService = require('../dbserver/FindLocationService');
 class SiteController {
-    home(req, res, next) {
-        res.send('CitizenZ');
+    getCities(req, res, next) {
+        const user = req.user.user;
+        if (user.role !== 'A1') {
+            return res.status(403).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        FindLocationService.getCitiesInfo()
+            .then(cities => {
+                // res.json(cities);
+                res.render('site/cities', { cities });
+            })
+    }
+
+    getDistricts(req, res, next) {
+        const user = req.user.user;
+        if (user.role !== 'A1' 
+            && user.role !== 'A2') {
+            return res.status(403).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        const city_id = req.params.city_id;
+        if (city_id.search(user.username) === -1 && user.role != 'A1') {
+            return res.status(404).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        FindLocationService.getInfoOfLevels(city_id)
+            .then(districts => {
+                // res.json(districts);
+                res.render('site/districts', { districts });
+            })
+    }
+
+    getWards(req, res, next) {
+        const user = req.user.user;
+        if (user.role !== 'A1' && user.role !== 'A2' 
+            && user.role !== 'A3') {
+            return res.status(403).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        const district_id = req.params.district_id;
+        if (district_id.search(user.username) === -1 && user.role != 'A1') {
+            return res.status(404).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        FindLocationService.getInfoOfLevels(district_id) 
+            .then(wards => {
+                // res.json(wards);
+                res.render('site/wards', { wards });
+            })
+    }
+
+    getVillages(req, res, next) {
+        const user = req.user.user;
+        if (user.role !== 'A1' && user.role !== 'A2' 
+            && user.role !== 'A3' && user.role !== 'B1') {
+            return res.status(403).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        const ward_id = req.params.ward_id;
+        if (ward_id.search(user.username) === -1 && user.role != 'A1') {
+            return res.status(404).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        FindLocationService.getInfoOfLevels(ward_id) 
+            .then(villages => {
+                // res.json(villages)
+                res.render('site/villages', { villages });
+            })
+    }
+
+    getCitizens(req, res, next) {
+        const user = req.user.user;
+        if (user.role !== 'A1' && user.role !== 'A2' && user.role !== 'A3' 
+            && user.role !== 'B1' && user.role !== 'B2') {
+            return res.status(403).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        const village_id = req.params.village_id;
+        if (village_id.search(user.username) === -1 && user.role != 'A1') {
+            return res.status(404).json({
+                error: true,
+                msg: 'Người dùng không có quyền truy cập miền này!'
+            })
+        }
+        FindLocationService.getInfoOfLevels(village_id) 
+            .then(citizens => {
+                // res.json(citizens)
+                res.render('site/citizens', { citizens });
+            })
+    }
+
+    getData(req, res, next) {
+        const id = req.params.id;
+        FindLocationService.getInfoOfLevels(id)
+            .then(data => {
+                return res.json(data);
+            }) 
+    }
+
+    login_site(req, res, next) {
+        res.render('login');
     }
 
     async signup(req, res, next) {
@@ -27,7 +143,7 @@ class SiteController {
                         msg: 'Đăng kí tài khoản thất bại!',
                         user
                     });
-                }) 
+                })
         }
         catch(err) {
             res.status(500).send('server error ' + err.message);
@@ -48,40 +164,37 @@ class SiteController {
                             role: data.userInDb.role
                         }
                     }
-                    jwt.sign(
+                    const accessToken = jwt.sign(
                         payload,
                         process.env.AUTH_SECRET,
-                        // {
-                        //     expiresIn: 36000,
-                        // },
-                        (err, token) => {
-                            if (err) throw err;
-                            const options = {
-                                expires: new Date(
-                                    Date.now() +
-                                        process.env.COOKIE_EXPIRE *
-                                            24 *
-                                            60 *
-                                            60 *
-                                            1000,
-                                ),
-                                httpOnly: true,
-                            };
-                            return res
-                                    .status(200)
-                                    .cookie('token', token, options)
-                                    .json({
-                                        error: false,
-                                        token,
-                                        user: data.userInDb.username,
-                                    });
-                        }
                     )
+                    res.cookie('token', accessToken);
+                    const username = data.userInDb.username;
+                    if (username.length === 2) {
+                        res.redirect(`/${username}/city`);
+                    }
+                    else if (username.length === 4) {
+                        res.redirect(`/${username}/district`);
+                    }
+                    else if (username.length === 6) {
+                        res.redirect(`/${username}/ward`);
+                    }
+                    else if (username.length === 8) {
+                        res.redirect(`/${username}/citizen`);
+                    }
+                    else {
+                        res.redirect('/all_city');
+                    }
                 })
         }
         catch(err) {
             res.status(500).send('server error ' + err.message);
         }
+    }
+
+    logout_site(req, res, next) {
+        res.clearCookie('token');
+        res.redirect('/');
     }
 
     /*
@@ -113,14 +226,14 @@ class SiteController {
                     payload,
                     process.env.CONFIRM_PASSWORD_KEY,
                     {
-                        expiresIn: 36000,
+                        expiresIn: 3600000000,
                     },
                     (err, token) => {
                         if (err) throw err;
                         const subject = 'Gửi mã xác nhận đổi mật khẩu';
                         sendByMail.confirmChangePassword(
                             subject,
-                            `${process.env.CLIENT_URL}confirmChangePassword/${token}`
+                            `${process.env.CLIENT_URL}reset_password/${token}`
                         )
                         .then(isSent => {
                             if (!isSent) {
@@ -138,34 +251,37 @@ class SiteController {
             })
     }
 
-    async confirmMessageResetPassword(req, res, next) {
-
-    }
-
     async forgetPassword(req, res, next) {
-        const { username } = req.body;
-        let { newPassword } = req.body;
-        const salt = await bcrypt.genSalt(10);
-        newPassword = await bcrypt.hash(newPassword, salt);
-        UserService.setPassword(username, newPassword)
-            .then(isChanged => {
-                if (!isChanged) {
-                    return res.json({
-                        error: true,
-                        msg: 'Chưa đổi được mật khẩu!'
+        let payload = req.body.username;
+        jwt.verify(payload, process.env.CONFIRM_PASSWORD_KEY, async (err, payload) => {
+            if (err) {
+                return res.json(err.message);
+            }
+            const username = payload.user.username;
+            let newPassword = req.body.newPassword;
+            newPassword = await EncryptService.encryptSingle(newPassword);
+            UserService.setPassword(username, newPassword)
+                .then(isChanged => {
+                    if (!isChanged) {
+                        return res.json({
+                            error: true,
+                            msg: 'Chưa đổi được mật khẩu!'
+                        })
+                    }
+                    res.json({
+                        error: false,
+                        msg: 'Đổi mật khẩu thành công!'
                     })
-                }
-                res.json({
-                    error: false,
-                    msg: 'Đổi mật khẩu thành công!'
                 })
-            })
+        });
     }
 
+    resetPassWordSite(req, res, next) {
+        res.render('site/resetPassword');
+    }
 
-
-    async confirmForgetPassword(req, res, next) {
-        
+    forgetPasswordSite(req, res, next) {
+        res.render('site/forgetPassword');
     }
 }
 

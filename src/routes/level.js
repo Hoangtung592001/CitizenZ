@@ -11,4 +11,6 @@ router.post('/decentralize_for_districts', auth, LevelController.decentralizeFor
 
 router.post('/decentralize_for_wards', auth, LevelController.decentralizeForWards);
 
+router.post('/decentralize_for_villages', auth, LevelController.decentralizeForVillages);
+
 module.exports = router;

@@ -94,7 +94,7 @@ class UserService {
         }
     }
 
-    async lockDeclaringWard(username) {
+    async lockDeclaringVillage(username) {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = 'UPDATE users SET canModify = 0 WHERE username = ?'
@@ -110,7 +110,7 @@ class UserService {
         }
     }
 
-    async unlockDeclaringWard(username) {
+    async unlockDeclaringVillage(username) {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = 'UPDATE users SET canModify = 1 WHERE username = ?'
@@ -118,6 +118,44 @@ class UserService {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async lockDeclaringWard(username) {
+        try {
+            const response = await new Promise(async (resolve, reject) => {
+                this.lockDeclaringVillage(username);
+                await FindLocationService.getAllVillages(username)
+                    .then(villages => {
+                        villages.forEach(village => {
+                            this.lockDeclaringVillage(village.village_id);
+                        });
+                    })
+                resolve(true);
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async unlockDeclaringWard(username) {
+        try {
+            const response = await new Promise(async (resolve, reject) => {
+                this.unlockDeclaringVillage(username);
+                await FindLocationService.getAllVillages(username)
+                    .then(villages => {
+                        villages.forEach(village => {
+                            this.unlockDeclaringVillage(village.village_id);
+                        });
+                    })
+                resolve(true);
             });
             return response;
         }
@@ -260,7 +298,7 @@ class UserService {
         }
     }
 
-    async declaringDoneForWard(username) {
+    async declaringDoneForVillage(username) {
         try {
             const response = await new Promise((resolve, reject) => {
                 this.getUserByUsername(username)
@@ -275,7 +313,7 @@ class UserService {
                             const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
                             db.query(query, [username], async (err, result) => {
                                 if (err) return reject(new Error(err.message));
-                                await this.declaringDoneForDistrict(username.slice(0, username.length - 2));
+                                await this.declaringDoneForWard(username.slice(0, username.length - 2));
                                 resolve(true);
                             })
                         }
@@ -288,17 +326,20 @@ class UserService {
         }
     }
 
+    async declaringDoneForWard(username) {
+        const childNodeUsers = await this.getUserNodeChild(username);
+        const result = childNodeUsers.every(childNodeUser => {
+            return childNodeUser.declaringDone;
+        });
+        if (result) {
+            const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
+            db.query(query, [username], (err, result) => {
+                this.declaringDoneForDistrict(username.slice(0, username.length - 2));
+            })
+        }
+    }
+
     async declaringDoneForDistrict(username) {
-        // try {
-        //     const response = await new Promise(async (resolve, reject) => {
-                
-        //         resolve(result);
-        //     });
-        //     return response;
-        // }
-        // catch(err) {
-        //     console.log(err);
-        // }
         const childNodeUsers = await this.getUserNodeChild(username);
         const result = childNodeUsers.every(childNodeUser => {
             return childNodeUser.declaringDone;
@@ -323,6 +364,43 @@ class UserService {
             })
         }
     }
+
+    // async randomVilages() {
+    //     try {
+    //         const response = await new Promise((resolve, reject) => {
+    //             const villages = ['Thôn', 'Bản', 'Phố'];
+    //             const midName = ['Ninh', 'Hòa', 'Sinh', 'Hậu', 'Bình', 'Bắc', 'Mau', 'Minh', 'Hồ', 'Giang', 'Long',
+    //                                 'Kiều', 'Định', 'Nam', 'Phong', 'Phúc'];
+    //             const wardQuery = 'SELECT * FROM wards';
+    //             db.query(wardQuery, (err, wards) => {
+    //                 const wards_id = wards.map(ward => {
+    //                     return ward.ward_id;
+    //                 })
+    //                 //Math.floor(Math.random() * max)
+    //                 const query = 'INSERT INTO villages SET ?'
+    //                 for (var i = 0; i < 100000; i++) {
+    //                     const randomVillages = Math.floor(Math.random() * 3);
+    //                     const randommidName1 = Math.floor(Math.random() * midName.length);
+    //                     const randommidName2 = Math.floor(Math.random() * midName.length);
+    //                     const randomWard_id = Math.floor(Math.random() * wards_id.length);
+    //                     const village = {
+    //                         "name": villages[randomVillages] + ' ' + midName[randommidName1] + ' ' + midName[randommidName2],
+    //                         "type": villages[randomVillages],
+    //                         "ward_id": wards_id[randomWard_id]
+    //                     }
+    //                     db.query(query, [village]);
+    //                 }
+    //                 resolve(true);
+    //             })
+
+    //         });
+    //         return response;
+    //     }
+    //     catch(err) {
+    //         console.log(err);
+    //     }
+        
+    // }
 
 
     // changeNumber(number) {
@@ -356,18 +434,18 @@ class UserService {
 
     //             //     resolve(result);
     //             // });
-    //             const query = 'SELECT * FROM xaphuong_1';
+    //             const query = 'SELECT * FROM villages_1';
     //             db.query(query, async (err, result) => {
     //                 if (err) reject(new Error(err.message));
     //                 let ward_id = 1;
     //                 let matp1 = 'a';
     //                 for (var i = 0; i < result.length; i++) {
-    //                     if (result[i].maqh !== matp1) {
+    //                     if (result[i].ward_id !== matp1) {
     //                         ward_id = 1;
-    //                         matp1 = result[i].maqh;
+    //                         matp1 = result[i].ward_id;
     //                     }
-    //                     const newMaqh = result[i].maqh.toString() + this.changeNumber(ward_id);
-    //                     const updateQuery = `UPDATE xaphuong_1 SET xaid = "${newMaqh}" WHERE stt = ${result[i].stt}`;
+    //                     const newMaqh = result[i].ward_id.toString() + this.changeNumber(ward_id);
+    //                     const updateQuery = `UPDATE villages_1 SET village_id = "${newMaqh}" WHERE stt = ${result[i].stt}`;
     //                     await db.query(updateQuery);
     //                     ward_id++;
     //                 }

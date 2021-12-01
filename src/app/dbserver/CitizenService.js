@@ -2,35 +2,24 @@ const db = require('./models/Citizen_Model');
 const UserService = require('./UserService');
 const FindLocationService = require('./FindLocationService');
 const amqp = require("amqplib");
+const sendByMail = require("../service/sendMessagesThroughGmail");
 
 db.connect();
 
 class CitizenService {
-
-    async addCitizen(citizen) {
-        try {
-            const response = await new Promise((resolve, reject) => {
-                const query = 'INSERT INTO citizens SET ? ';
-                db.query(query, [citizen], (err, result) => {
-                    if (err) reject(new Error(err.message));
-                    resolve(result);
-                    // const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${citizen.ward_id}`;
-                    // db.query(addPopulationQuery, (err, isAdded) => {
-                    //     if (err) reject(new Error(err.message));
-                    // })
-                });
-            });
-            return response;
-        }
-        catch(err) {
-            console.log(err);
-        }
-    }
-
+    
     async getCitizenById(id) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = 'SELECT * FROM citizens WHERE citizen_id = ?';
+                const query = 'SELECT c.*, e.*, v.village_id, v.name village_name,' +
+                ' w.ward_id, w.name ward_name, d.district_id, d.name district_name, ci.city_id, ci.name city_name' +
+                ' FROM citizens c' +
+                ' JOIN ethnic_groups e ON c.ethnic_id = e.ethnic_id' +
+                ' JOIN villages v ON c.village_id = v.village_id' +
+                ' JOIN wards w ON w.ward_id = v.ward_id' +
+                ' JOIN districts d ON w.district_id = d.district_id' +
+                ' JOIN cities ci ON d.city_id = ci.city_id' +
+                ' WHERE c.citizen_id = ?';
                 db.query(query, [id], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -43,49 +32,98 @@ class CitizenService {
         }
     }
 
+    async addCitizen(citizen) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = 'INSERT INTO citizens SET ? ';
+                db.query(query, [citizen], (err, result) => {
+                    /**
+                    `UPDATE villages SET population = population + 1 WHERE village_id = ${village_id};` +
+                    ` UPDATE wards SET population = population + 1 WHERE ward_id = ${ward_id};` +
+                    ` UPDATE districts SET population = population + 1 WHERE district_id = ${district_id};` +
+                    ` UPDATE cities SET population = population + 1 WHERE city_id = ${city_id};`;
+                     */
+                    if (err) reject(new Error(err.message));
+                    const village_id = citizen.village_id;
+                    const ward_id = village_id.slice(0, 6);
+                    const district_id = village_id.slice(0, 4);
+                    const city_id = village_id.slice(0, 2);
+                    const addPopulationVillageQuery = `UPDATE villages SET population = population + 1 WHERE village_id = ${village_id};`;
+                    const addPopulationWardQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${ward_id};`
+                    const addPopulationDistrictQuery = `UPDATE districts SET population = population + 1 WHERE district_id = ${district_id};`
+                    const addPopulationCityQuery = `UPDATE cities SET population = population + 1 WHERE city_id = ${city_id};`;
+                    db.query(addPopulationVillageQuery);
+                    db.query(addPopulationWardQuery);
+                    db.query(addPopulationDistrictQuery);
+                    db.query(addPopulationCityQuery);
+                    resolve(result);
+                });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+    async deleteCitizen(citizen) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = 'DELETE FROM citizens WHERE citizen_id = ?'
+                db.query(query, [citizen.citizen_id], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    const village_id = citizen.village_id;
+                    const ward_id = village_id.slice(0, 6);
+                    const district_id = village_id.slice(0, 4);
+                    const city_id = village_id.slice(0, 2);
+                    const deletePopulationVillageQuery = `UPDATE villages SET population = population - 1 WHERE village_id = ${village_id};`;
+                    const deletePopulationWardQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${ward_id};`
+                    const deletePopulationDistrictQuery = `UPDATE districts SET population = population - 1 WHERE district_id = ${district_id};`
+                    const deletePopulationCityQuery = `UPDATE cities SET population = population - 1 WHERE city_id = ${city_id};`;
+                    db.query(deletePopulationVillageQuery);
+                    db.query(deletePopulationWardQuery);
+                    db.query(deletePopulationDistrictQuery);
+                    db.query(deletePopulationCityQuery);
+                    resolve(result);
+                })
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err.message);
+        }
+    }
+
     async changeInfoCitizen(citizen_id, citizen) {
         try {
             const response = await new Promise(async (resolve, reject) => {
-                if (!citizen.ward_id) {
-                    const query = `UPDATE citizens` + 
-                    ` SET ? WHERE citizen_id = "${citizen_id}"`;
-                    db.query(query, [citizen], (err, result) => {
-                        if (err) reject(new Error(err.message));
-                        resolve(result);
-                    });
-                }
-                else {
-                    const amqpServer = "amqp://localhost:5672";
-                    const connection = await amqp.connect(amqpServer);
-                    const channel = await connection.createChannel();
-                    const QUEUE = `sendConfirm`
-                    await channel.assertQueue(QUEUE);
-                    channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(citizen)));
-                    channel.consume('confirmMessage', (msg) => {
-                        console.log(msg.content);
-                        const findCitizen = 'SELECT * FROM citizens WHERE citizen_id = ?';
-                        db.query(findCitizen, [citizen_id], (err, foundCitizen) => {
-                            const newWard = citizen.ward_id;
-                            const oldWard = foundCitizen[0].ward_id;
-                            const updateQuery = `UPDATE citizens` + 
-                            ` SET ? WHERE citizen_id = "${citizen_id}"`;
-                            db.query(updateQuery, [citizen], (err, result) => {
-                                if (err) reject(new Error(err.message));
-                            });
-                            // const deletePopulationQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${oldWard}`;
-                            // db.query(deletePopulationQuery, (err, isDeleted) => {
-                            //     if (err) reject(new Error(err.message));
-                            // })
-                            // const addPopulationQuery = `UPDATE wards SET population = population + 1 WHERE ward_id = ${newWard}`;
-                            // db.query(addPopulationQuery, (err, isAdded) => {
-                            //     if (err) reject(new Error(err.message));
-                            // })
-                        })
-                        resolve(true);
-                    }, {
-                        noAck: true
-                    });
-                }
+                const findCitizenQuery = 'SELECT * FROM citizens WHERE citizen_id = ?';
+                db.query(findCitizenQuery, [citizen_id], async (err, foundCitizen) => {
+                    if (citizen.village_id === foundCitizen[0].village_id) {
+                        const query = `UPDATE citizens` + 
+                        ` SET ? WHERE citizen_id = "${citizen_id}"`;
+                        db.query(query, [citizen], (err, result) => {
+                            if (err) reject(new Error(err.message));
+                            resolve(result);
+                        });
+                    }
+                    else {
+                        const amqpServer = "amqp://localhost:5672";
+                        const connection = await amqp.connect(amqpServer);
+                        const channel = await connection.createChannel();
+                        const QUEUE = `sendConfirm`
+                        await channel.assertQueue(QUEUE);
+                        //http://localhost:5000/information/confirm_changeInfo
+                        await sendByMail.confirmChangePassword('Xác nhận chuyển nơi ở', 'http://localhost:5000/information/confirm_changeInfo');
+                        channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(citizen)));
+                        channel.consume('confirmMessage', async (msg) => {
+                            await this.deleteCitizen(foundCitizen[0]);
+                            await this.addCitizen(citizen);
+                            resolve(true);
+                        }, {
+                            noAck: true
+                        });
+                    }
+                });
             });
             return response;
         }
@@ -127,25 +165,7 @@ class CitizenService {
         }
     }
 
-    async deleteCitizen(citizen) {
-        try {
-            const response = await new Promise((resolve, reject) => {
-                const query = 'DELETE FROM citizens WHERE citizen_id = ?'
-                db.query(query, [citizen.citizen_id], (err, result) => {
-                    if (err) reject(new Error(err.message));
-                    resolve(result);
-                    const deletePopulationQuery = `UPDATE wards SET population = population - 1 WHERE ward_id = ${citizen.ward_id}`;
-                    db.query(deletePopulationQuery, (err, isDeleted) => {
-                        if (err) reject(new Error(err.message));
-                    })
-                })
-            });
-            return response;
-        }
-        catch(err) {
-            console.log(err.message);
-        }
-    }
+    
 }
 
 module.exports = new CitizenService();

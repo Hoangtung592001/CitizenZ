@@ -1,0 +1,46 @@
+<table class="table">
+<thead>
+    <tr>
+    <th scope="col">STT</th>
+    <th scope="col">Tên Tỉnh</th>
+    <th scope="col">Tình trạng nhập liệu</th>
+    <th scope="col">Dân số</th>
+    </tr>
+</thead>
+<tbody class="city__table">
+    {{#each cities}}
+    <tr>
+    <th scope="row">{{this.city_id}}</th>
+    <td><a href="{{this.city_id}}/city" class="link-secondary">{{this.name}}</a></td>
+    <td>{{processing this.declaringDone}}</td>
+    <td>{{this.population}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+</table>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const cityTable = document.querySelector('.city__table');
+        const url = window.location.href.slice(0, 22) + 'city';
+        console.log(url);
+        const socket = io();
+        socket.on('chatMessage', ({ msg }) => {
+            fetch(url)
+                .then(data => data.json())
+                .then(cities => {
+                    cityTable.innerHTML = cities.map((city) => {
+                        return `
+                            <tr>
+                                <th scope="row">${city.city_id}</th>
+                                <td><a href="${city.city_id}/city" class="link-secondary">${city.name}</a></td>
+                                <td>${city.declaringDone ? 'Nhập liệu thành công!' : 'Đang nhập liệu!'}</td>
+                                <td>${city.population}</td>
+                            </tr>
+                            `
+                    }).join('');
+                })
+        })
+    });
+</script>
+

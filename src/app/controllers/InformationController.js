@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const amqp = require("amqplib");
+const moment = require('moment');  
+
 /*
 - Phân tích về tỷ lệ nam, nữ.
 - Phân tích về độ tuổi.
@@ -28,9 +30,9 @@ class InformationController {
                     });
                 }
             })
-        await UserService.checkPermission(user.username, 'A4')
+        await Promise.all([UserService.checkPermission(user.username, 'B1'), UserService.checkPermission(user.username, 'B2')])
             .then(data => {
-                if (!data) {
+                if (!data[1] && !data[0]) {
                     return res.json({
                         error: true,
                         msg: 'Người dùng không có quyền modify!'
@@ -45,16 +47,14 @@ class InformationController {
             })
         const citizen = req.body;
         if (!(citizen.citizen_id && citizen.citizen_name && citizen.current_address
-            && (citizen.gender === 'Nam' || citizen.gender === 'Nữ') 
+            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ') 
         )) {
             return res.json({
                 error: true,
                 msg: 'Bạn nhập sai hoặc thiếu thông tin!'
             });
         }
-        citizen.ward_id = user.username;
-        // return res.json(citizen);
-        // citizen.ethnic_id = Number(citizen.ethnic_id);
+        citizen.village_id = user.username;
         CitizenService.getCitizenById(citizen.citizen_id)
             .then(data => {
                 if (data[0]) {
@@ -80,6 +80,10 @@ class InformationController {
             })
     }
 
+    declarationSite(req, res, next) {
+        res.render('information/declaration');
+    }
+
     async changeInfo(req, res, next) {
         const citizen_id = req.params.citizen_id;
         const user = req.user.user;
@@ -100,7 +104,7 @@ class InformationController {
                                     msg: 'Người dùng này không tồn tại!'
                                 });
                             }
-                            if (user.username !== citizen[0].ward_id) {
+                            if (user.username !== citizen[0].village_id) {
                                 return res.json({
                                     error: true,
                                     msg: 'Bạn không được quyền sửa đổi người này'
@@ -109,7 +113,10 @@ class InformationController {
                             const updatingCitizen = {
                                 ...req.body
                             };
-                            
+                            delete updatingCitizen.city_id;
+                            delete updatingCitizen.district_id;
+                            delete updatingCitizen.ward_id;
+                            // return res.json(updatingCitizen);
                             await CitizenService.changeInfoCitizen(citizen_id, updatingCitizen)
                                 .then(isChanged => {
                                     if (!isChanged) {
@@ -122,6 +129,7 @@ class InformationController {
                                         error: false,
                                         msg: 'Thay đổi thông tin thành công!'
                                     });
+                                    // return res.json(isChanged)
                                 })
                         })
                         .catch(err => {
@@ -130,6 +138,24 @@ class InformationController {
                             })
                         })
                 }
+            })
+    }
+
+    changeInfoSite(req, res, next) {
+        const citizen_id = req.params.citizen_id;
+        const user = req.user.user;
+        CitizenService.getCitizenById(citizen_id)
+            .then(citizen => {
+                const choseCitizen = citizen[0];
+                if (choseCitizen.village_id.search(user.username) === -1 && user.role != 'A1') {
+                return res.status(404).json({
+                    error: true,
+                    msg: 'Người dùng không có quyền truy cập miền này!'
+                    })
+                }
+                choseCitizen.date_of_birth = moment(choseCitizen.date_of_birth).format('YYYY-MM-DD');
+                // return res.json(citizen);
+                res.render('information/changeInfo', { citizen: choseCitizen });
             })
     }
 
@@ -145,7 +171,7 @@ class InformationController {
                     });
                 }
 
-                if (citizen[0].ward_id !== user.username) {
+                if (citizen[0].village_id !== user.username) {
                     return res.json({
                         error: true,
                         msg: 'Tài khoản này không có quyền xóa người dùng này!'
@@ -183,7 +209,7 @@ class InformationController {
 
     async test(req, res, next) {
         const user = req.user.user;
-        UserService.declaringDoneForWard(user.username)
+        UserService.changeDatabase()
             .then(districts => {
                 return res.json(districts);
             })
@@ -226,7 +252,7 @@ class InformationController {
 
     async declaringDone(req, res, next) {
         const user = req.user.user;
-        UserService.declaringDoneForWard(user.username)
+        UserService.declaringDoneForVillage(user.username)
             .then(isDone => {
                 if (!isDone) {
                     return res.json({
@@ -238,6 +264,20 @@ class InformationController {
                     error: false,
                     msg: 'Khai báo thành công!'
                 })
+            })
+    }
+
+    getCountries(req, res, next) {
+        FindLocationService.getCountries()
+            .then(countries => {
+                return res.json(countries);
+            })
+    }
+
+    getEthnicGroups(req, res, next) {
+        FindLocationService.getEthnicGroups()
+            .then(groups => {
+                return res.json(groups);
             })
     }
 }

@@ -8,13 +8,13 @@ const morgan = require('morgan');
 const handlebars = require('express-handlebars');
 const route = require('./routes');
 const methodOverride = require('method-override');
-const app = express();
+const socketio = require('socket.io');
 const cookieParser = require('cookie-parser');
+const app = express();
 const server = http.createServer(app);
 const dotenv = require('dotenv');
+const io = socketio(server);
 
-
-//
 //https://morioh.com/p/ca75996654d1
 
 
@@ -32,7 +32,6 @@ dotenv.config({path: __dirname + '/.env'});
 
 const PORT = process.env.PORT || 3000;
 app.use(cookieParser());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(
@@ -47,6 +46,29 @@ app.use(methodOverride('_method'));
 
 app.use(morgan('combined'));
 
+app.engine(
+    'hbs',
+    handlebars({
+        extname: '.hbs',
+        helpers: {
+            processing: (value) => {
+                if (!value) return 'Đang nhập liệu!';
+                return 'Nhập liệu thành công!'
+            }
+        }
+    }),
+);
+
+app.set('view engine', 'hbs');
+
+app.set('views', path.join(__dirname, 'resources\\views'));
+
+io.on('connection', socket => {
+    socket.on('message', (msg) => {
+        io.emit('chatMessage', { msg: msg });
+    });
+})
+
 route(app);
 
 server.listen(PORT, () => {
@@ -54,7 +76,3 @@ server.listen(PORT, () => {
 });
 
 module.exports = app;
-
-
-
-

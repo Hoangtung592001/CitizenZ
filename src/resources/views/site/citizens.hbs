@@ -1,0 +1,45 @@
+<table class="table">
+<thead>
+    <tr>
+    <th scope="col">Số chứng minh thư</th>
+    <th scope="col">Họ và Tên</th>
+    <th scope="col">Giới tính</th>
+    <th scope="col">Địa Chỉ</th>
+    <th scope="col">Ngày sinh</th>
+    <th scope="col">Quốc tịch</th>
+    </tr>
+</thead>
+<tbody>
+    {{#each citizens}}
+    <tr>
+    <th scope="row">{{this.citizen_id}}</th>
+    <td><a href="http://localhost:5000/information/change_info/{{this.citizen_id}}" class="link-secondary">{{this.citizen_name}}</a></td>
+    <td>{{this.citizen_gender}}</td>
+    <td>{{this.current_address}}</td>
+    <td>{{this.date_of_birth}}</td>
+    <td>{{this.citizen_nationality}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+</table>
+<button type="button" class="btn btn-secondary btn-declaringDone">Nhấn để nộp kết quả</button>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const buttonDeclaringDone = document.querySelector('.btn-declaringDone');
+        const socket = io();
+        buttonDeclaringDone.onclick = function() {
+            fetch('http://localhost:5000/information/declaringDone', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(data => data.json())
+                .then(commitSucess => {
+                    console.log(commitSucess);
+                    socket.emit('message', { msg: 'update new'} );
+                })
+        }
+    });
+</script>
