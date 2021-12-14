@@ -250,7 +250,7 @@ class SiteController {
                     })
             })
     }
-
+    
     async forgetPassword(req, res, next) {
         let payload = req.body.username;
         jwt.verify(payload, process.env.CONFIRM_PASSWORD_KEY, async (err, payload) => {

@@ -1,27 +1,195 @@
-<form class="formLogin" method="POST" action="/login">
-    <div class="form-group">
-        <label for="exampleInputEmail1">Tài khoản</label>
-        <input type="text" class="form-control" name="username" placeholder="Nhập tài khoản">
-        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-    </div>
-    <div class="form-group">
-        <label for="exampleInputPassword1">Mật khẩu</label>
-        <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu">
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CitizenV</title>
+    <link rel="stylesheet" href="login.css">
+    <style>
+    body {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+        background-color: rgba(51, 255, 255, 0.2);
+    }
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const formLogin = document.querySelector('.formLogin');
-        formLogin.onsubmit = function(e) {
-            e.preventDefault();
-            formLogin.submit();
+    div#container {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+    }
+
+    div#dangnhap {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 5vh;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        box-shadow: 10px 10px 10px 2px grey;
+    }
+
+    div#dau {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 20%;
+    }
+
+    div#dau > div {
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin-left: auto;
+        margin-right: auto;
+        height: 100%;
+        font-size: 4vw;
+        padding-top: calc(8vh - 2vw);
+        color:rgb(135, 11, 236);
+    }
+
+    div#dau > img {
+        height: 100%;
+        margin-left: 5%;
+    }
+
+
+    div#than {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 80%;
+    }
+
+    div.flex-item {
+        width: 50%;
+        height: 100%;
+        display: block;
+    }
+
+    div#flex1 > img {
+        margin-top: 5%;
+    }
+
+    div#flex1 > div {
+        width: 100%;
+        font-size: 120%;
+        color: rgb(255, 0, 0);
+    }
+
+    form#flex2 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    form#flex2 > div.dangnhap {
+        text-align: center;
+        height: 15%;
+        width: 100%;
+    }
+
+    form#flex2 > div.dangnhap > input {
+        height: 80%;
+        width: 90%;
+        font-size: 2vw;
+        border-radius: 15px;
+        border: 1px solid rgb(36, 14, 238);
+        background-color: rgba(23, 128, 75, 0.2);
+    }
+
+    form#flex2 > div.dangnhap > button {
+        height: 80%;
+        width: 90%;
+        font-size: 2vw;
+        border-radius: 15px;
+        border: 1px solid rgb(36, 14, 238);
+        background-color: rgba(47, 0, 218, 0.5);
+    }
+
+    div#login > button:hover {
+        color: rgb(251, 255, 13);
+    }
+
+    form#flex2 > div#pp {
+        height: 10%;
+        width: 100%;
+        text-align: center;
+        color: rgb(16, 7, 136);
+        font-size: 1.8vw;
+        padding-top: calc(4.5vh - 1vw);
+        margin-bottom: 15px;
+    }
+
+    div#forget {
+        text-align: end;
+        padding-right: 5%;
+    }
+
+    div#forget > button {
+        border: none;
+        color: rgb(0, 68, 255);
+        background-color: rgba(23, 128, 75, 0);
+    }
+    @media screen and (min-aspect-ratio: 3/2) {
+        div#dangnhap {
+            height: 90vh;
+            aspect-ratio: 3/2;
         }
-    });
-</script>
+        div#flex1 > img {
+            height: calc(60vh);
+        }
+    }
 
-{{!-- <div class="body">
+    div#forget > button:hover {
+        color: rgb(255, 2, 2);
+    }
+
+    @media screen and (max-aspect-ratio: 3/2) {
+        div#dangnhap {
+            height: 90vh;
+            width: 90vw;
+        }
+        div#flex1 > img {
+            height: calc(45vw);
+        }
+    }
+
+    @media screen and (max-aspect-ratio: 1/1) {
+        form#flex2 > div#pp {
+            font-size: 3vh;
+        }
+        form#flex2 > div.dangnhap > input {
+            font-size: 3vh;
+        }
+        form#flex2 > div.dangnhap > button {
+            font-size: 3vh;
+        }
+    }
+
+    @media screen and (max-width: 648px) {
+        div#dau {
+            flex-direction: column;
+        }
+        div#dau > img {
+            margin-left: auto;
+            margin-right: auto;
+            height: 60%;
+        }
+        div#dau > div {
+            height: 40%;
+            font-size: 4vw;
+            padding-top: calc(3.2vh - 2vw);
+        }
+        div#flex1 {
+            display: none;
+        }
+        form#flex2 {
+            width: 100%;
+        }
+    }
+    </style>
+</head>
+<body>
     <div id="container">
         <div id="dangnhap">
             <div id="dau">
@@ -37,47 +205,55 @@
                         CitizenV - Ứng dụng công nghệ vào quản lý dân số
                     </div>
                 </div>
-                <div class="flex-item" id="flex2">
+                <form class="flex-item" id="flex2" method="POST" action="/login">
                     <div id="pp">Sử dụng tài khoản bạn được cung cấp</div>
                     <div class="dangnhap">
-                        <input type="text" placeholder="Tên tài khoản" id="taikhoan">
+                        <input type="text" placeholder="Tên tài khoản" id="taikhoan" name="username">
                     </div>
                     <div class="dangnhap" id="password">
-                        <input type="password" placeholder="Mật khẩu">
+                        <input type="password" placeholder="Mật khẩu" name="password">
                     </div>
                     <div class="dangnhap" id="login">
-                        <button type="button" onclick="login(this)">Đăng nhập</button>
+                        <button type="submit" onclick="login(this)">Đăng nhập</button>
                     </div>
                     <div id="forget">
-                        <button type="button" onclick="forget(this)">Quên mật khẩu ?</button>
+                        <button>Quên mật khẩu ?</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 <script>
-    function forget(x) {
-        x.style.display = 'none';
-        var dangnhap = document.getElementById('login').getElementsByTagName('button')[0];
-        dangnhap.innerHTML = 'Gửi xác nhận';
-        var password = document.getElementById('password');
-        password.style.display = 'none';
-    }
-    function login(x) {
-        if (x.innerHTML != "Đăng nhập") {
-            var tk = document.getElementById("taikhoan");
-            tk.value = tk.value.trim();
-            if (tk.value == "") {
-                alert('Bạn chưa nhập gì cả');
-                return;
-            }
-            x.innerHTML = "Đăng nhập";
-            var password = document.getElementById('password');
-            password.style.display = '';
-            var fg = document.getElementById('forget').getElementsByTagName('button')[0];
-            fg.style.display = "";
-            tk.value = "";
+    document.addEventListener("DOMContentLoaded", () => {
+        const formLogin = document.getElementById("flex2");
+        formLogin.onsubmit = function(e) {
+            e.preventDefault();
+            formLogin.submit();
         }
-    }
-</script> --}}
+        function forget(x) {
+            x.style.display = 'none';
+            var dangnhap = document.getElementById('login').getElementsByTagName('button')[0];
+            dangnhap.innerHTML = 'Gửi xác nhận';
+            var password = document.getElementById('password');
+            password.style.display = 'none';
+        }
+        function login(x) {
+            if (x.innerHTML != "Đăng nhập") {
+                var tk = document.getElementById("taikhoan");
+                tk.value = tk.value.trim();
+                if (tk.value == "") {
+                    alert('Bạn chưa nhập gì cả');
+                    return;
+                }
+                x.innerHTML = "Đăng nhập";
+                var password = document.getElementById('password');
+                password.style.display = '';
+                var fg = document.getElementById('forget').getElementsByTagName('button')[0];
+                fg.style.display = "";
+                tk.value = "";
+            }
+        }
+    })
+</script>
+</body>
+</html>
