@@ -8,6 +8,7 @@ db.connect();
 
 class CitizenService {
     
+    // Lấy thông tin một người dân dựa vào số cmt
     async getCitizenById(id) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -32,6 +33,7 @@ class CitizenService {
         }
     }
 
+    // Hàm thêm một công dân.
     async addCitizen(citizen) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -65,6 +67,8 @@ class CitizenService {
             console.log(err);
         }
     }
+
+    // Hàm xóa một công dân.
     async deleteCitizen(citizen) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -93,11 +97,14 @@ class CitizenService {
         }
     }
 
+    // Hàm thay đổi thông tin một công dân
+
     async changeInfoCitizen(citizen_id, citizen) {
         try {
             const response = await new Promise(async (resolve, reject) => {
                 const findCitizenQuery = 'SELECT * FROM citizens WHERE citizen_id = ?';
                 db.query(findCitizenQuery, [citizen_id], async (err, foundCitizen) => {
+                    // Trường hợp không thay đổi làng.
                     if (citizen.village_id === foundCitizen[0].village_id) {
                         const query = `UPDATE citizens` + 
                         ` SET ? WHERE citizen_id = "${citizen_id}"`;
@@ -106,6 +113,7 @@ class CitizenService {
                             resolve(result);
                         });
                     }
+                    // Trường hợp thay đổi làng.
                     else {
                         const amqpServer = "amqp://localhost:5672";
                         const connection = await amqp.connect(amqpServer);
@@ -132,6 +140,7 @@ class CitizenService {
         }
     }
 
+    // Hàm check xem người dùng này còn quyền modify hay không tức là hết hạn khai báo.
     async canModify(username) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -165,7 +174,47 @@ class CitizenService {
         }
     }
 
-    
+    // Lấy thông tin các công dân dựa vào ô input search
+
+    async getCitizensBySearchValue(searchValue) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = `SELECT * FROM citizens WHERE citizen_name LIKE '%${searchValue}%'`;
+                db.query(query, (err, citizens) => {
+                    if (err) reject (new Error(err.message));
+                    resolve(citizens);
+                });
+            });
+            return response;
+        }
+
+        catch(err) {
+            console.log(err);
+        }
+    }
+    // Trả ra kết quả là tất cả dân cư của một cấp nào đó tùy thuộc vào id.    
+    async getCitizensOfLevels(id) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                let query = '';
+                if (id === 'city') {
+                    query = 'SELECT * FROM citizens';
+                }
+                else {
+                    query = `SELECT * FROM citizens WHERE village_id LIKE '${id}%'`;
+                }
+                console.log(query);
+                db.query(query, (err, citizens) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(citizens);
+                });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
 }
 
 module.exports = new CitizenService();

@@ -15,10 +15,11 @@ const moment = require('moment');
 
 */
 class InformationController {
+
     home(req, res, next) {
         res.send('Nhập liệu thành công!');
     }
-    
+    // Hàm dùng để khai báo công dân của B2
     async declaration(req, res, next) {
         const user = req.user.user;
         await CitizenService.canModify(user.username)
@@ -46,8 +47,10 @@ class InformationController {
                 })
             })
         const citizen = req.body;
-        if (!(citizen.citizen_id && citizen.citizen_name && citizen.current_address
-            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ') 
+        if (!(citizen.citizen_id && citizen.citizen_name
+            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ'
+            && !citizen.occupation && !citizen.educational_level && !citizen.permanent_address && !citizen.temporary_address
+            ) 
         )) {
             return res.json({
                 error: true,
@@ -80,10 +83,75 @@ class InformationController {
             })
     }
 
+    async declarationByB1(req, res, next) {
+        const user = req.user.user;
+        await CitizenService.canModify(user.username)
+            .then(canModify => {
+                if (canModify.error) {
+                    return res.json({
+                        error: true,
+                        msg: canModify.msg
+                    });
+                }
+            })
+        await Promise.all([UserService.checkPermission(user.username, 'B1'), UserService.checkPermission(user.username, 'B2')])
+            .then(data => {
+                if (!data[1] && !data[0]) {
+                    return res.json({
+                        error: true,
+                        msg: 'Người dùng không có quyền modify!'
+                    })
+                }
+            })
+            .catch(err => {
+                return res.json({
+                    error: true,
+                    msg: 'Không tìm thấy người dùng!'
+                })
+            })
+        const citizen = req.body;
+        if (!(citizen.citizen_id && citizen.citizen_name
+            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ')
+            && !citizen.occupation && !citizen.educational_level && !citizen.permanent_address && !citizen.temporary_address
+            && !citizen.village_id
+        )) {
+            return res.json({
+                error: true,
+                msg: 'Bạn nhập sai hoặc thiếu thông tin!'
+            });
+        }
+        citizen.village_id = user.username;
+        CitizenService.getCitizenById(citizen.citizen_id)
+            .then(data => {
+                if (data[0]) {
+                    return res.status(400).json({
+                        error: true,
+                        msg: 'Số chứng minh thư đã tồn tại!',
+                    });
+                }
+                CitizenService.addCitizen(citizen)
+                    .then(isCreated => {
+                        if (!isCreated) {
+                            return res.status(400).json({
+                                error: true,
+                                msg: 'Chưa thêm được thông tin',
+                            });
+                        }
+                        res.status(201).json({
+                            error: false,
+                            msg: 'Đã thêm được thông tin',
+                            citizen
+                        });
+                    });
+            })
+    }
+
+    // Hàm để render ra form khai báo công dân.
     declarationSite(req, res, next) {
         res.render('information/declaration');
     }
 
+    // Hàm dùng để sửa thông tin công dân.
     async changeInfo(req, res, next) {
         const citizen_id = req.params.citizen_id;
         const user = req.user.user;
@@ -140,6 +208,7 @@ class InformationController {
                 }
             })
     }
+    // Hàm render ra trang sửa thông tin công dân.
 
     changeInfoSite(req, res, next) {
         const citizen_id = req.params.citizen_id;
@@ -158,10 +227,13 @@ class InformationController {
                 res.render('information/changeInfo', { citizen: choseCitizen });
             })
     }
+    // Hàm dùng để xóa một công dân.
 
     async deleteCitizen(req, res, next) {
         const user = req.user.user;
+        // id của công dân muốn xóa
         const citizen_id = req.params.citizen_id;
+        // Lấy công dân xem công dân có tồn tại không nếu không tồn tại thì không xóa được.
         await CitizenService.getCitizenById(citizen_id)
             .then(async citizen => {
                 if (!citizen[0]) {
@@ -170,13 +242,14 @@ class InformationController {
                         msg: 'Người dùng không tồn tại!'
                     });
                 }
-
+                // Check xem người này có quyền xóa công dân này không.
                 if (citizen[0].village_id !== user.username) {
                     return res.json({
                         error: true,
                         msg: 'Tài khoản này không có quyền xóa người dùng này!'
                     })
                 }
+                // Gọi hàm xóa coogn dân ở CitizenService
                 await CitizenService.deleteCitizen(citizen[0])
                     .then(isDeleted => {
                         if (!isDeleted) {
@@ -192,6 +265,9 @@ class InformationController {
                     })
             })
     }
+
+    // Đây là hàm mà ví dụ một người muốn chuyển từ làng 1  qua làng 2 khác thì làng 1 sẽ gửi 
+    // request cho làng 2 nếu làng 2 chấp nhận thì công dân sẽ được chuyển làng.
 
     async confirmChangeInfo(req, res, next) {
         const amqpServer = "amqp://localhost:5672";
@@ -214,6 +290,8 @@ class InformationController {
                 return res.json(districts);
             })
     }
+
+    // Đây là hàm dùng để lấy Infomation của công dân của một thành phố
 
     async getInfoCitizenOfCities(req, res, next) {
         const user = req.user.user;
@@ -250,6 +328,8 @@ class InformationController {
             })
     }
 
+    // Đây là hàm xác nhận người dùng đã khai báo xong
+
     async declaringDone(req, res, next) {
         const user = req.user.user;
         UserService.declaringDoneForVillage(user.username)
@@ -267,12 +347,17 @@ class InformationController {
             })
     }
 
+    // Đây là hàm dùng để lấy Tất cả các quốc gia trên thế giới và render vào trong 
+    // ô select ở trong phần form khai báo công dân
+
     getCountries(req, res, next) {
         FindLocationService.getCountries()
             .then(countries => {
                 return res.json(countries);
             })
     }
+
+    // Hàm lấy tất cả các dân tộc và render vào trong form khai báo công dân.
 
     getEthnicGroups(req, res, next) {
         FindLocationService.getEthnicGroups()

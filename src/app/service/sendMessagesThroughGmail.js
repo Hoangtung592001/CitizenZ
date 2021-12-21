@@ -14,6 +14,7 @@ const mailOptions = {
     // text: 'That was easy!'
 };
 
+// service dùng để send thông tin bằng email
 class sendByMail {
     async confirmChangePassword(subject, text) {
         mailOptions.subject = subject;

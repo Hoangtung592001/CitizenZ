@@ -6,6 +6,7 @@ const Validate = require('../service/validate');
 const sendByMail = require('../service/sendMessagesThroughGmail');
 const FindLocationService = require('../dbserver/FindLocationService');
 class SiteController {
+    // Hàm render ra các tỉnh trong cả nước
     getCities(req, res, next) {
         const user = req.user.user;
         if (user.role !== 'A1') {
@@ -20,6 +21,8 @@ class SiteController {
                 res.render('site/cities', { cities });
             })
     }
+
+    // Hàm render ra các huyện của một tỉnh
 
     getDistricts(req, res, next) {
         const user = req.user.user;
@@ -44,6 +47,8 @@ class SiteController {
             })
     }
 
+    // Hàm render ra các xã, phường của một huyện
+
     getWards(req, res, next) {
         const user = req.user.user;
         if (user.role !== 'A1' && user.role !== 'A2' 
@@ -66,6 +71,8 @@ class SiteController {
                 res.render('site/wards', { wards });
             })
     }
+
+    // Hàm render ra các làng của một xã phường
 
     getVillages(req, res, next) {
         const user = req.user.user;
@@ -90,6 +97,8 @@ class SiteController {
             })
     }
 
+    // Render ra người dân của một làng, xã
+
     getCitizens(req, res, next) {
         const user = req.user.user;
         if (user.role !== 'A1' && user.role !== 'A2' && user.role !== 'A3' 
@@ -113,6 +122,12 @@ class SiteController {
             })
     }
 
+    // Hàm này đặc biệt là khi id truyền vào là city thì trả về các tỉnh trong cả nước
+    // Nếu id là id của một tỉnh thì trả về các huyện của một Tỉnh
+    // Nếu id là id của một huyện thì trả về các xã của một huyện
+    // Nếu id là id của một xã thì trả về các làng của một xã
+    // Nếu id là id của một làng thì trả về các người dân của một làng
+
     getData(req, res, next) {
         const id = req.params.id;
         FindLocationService.getInfoOfLevels(id)
@@ -124,6 +139,8 @@ class SiteController {
     login_site(req, res, next) {
         res.render('login');
     }
+
+    // Hàm đăng ký tuy nhiên không cần lắm
 
     async signup(req, res, next) {
         try {
@@ -149,6 +166,7 @@ class SiteController {
             res.status(500).send('server error ' + err.message);
         }
     }
+    // Hàm Login
 
     async login(req, res, next) {
         try {
@@ -192,6 +210,7 @@ class SiteController {
         }
     }
 
+
     logout_site(req, res, next) {
         res.clearCookie('token');
         res.redirect('/');
@@ -206,6 +225,8 @@ class SiteController {
     var originalText = bytes.toString(CryptoJS.enc.Utf8);
     console.log(originalText);
     */
+
+
 
     async sendMessageConfirmResetPassword(req, res, next) {
         const { username } = req.body;
@@ -283,6 +304,8 @@ class SiteController {
     forgetPasswordSite(req, res, next) {
         res.render('site/forgetPassword');
     }
+
+    
 }
 
 module.exports = new SiteController();

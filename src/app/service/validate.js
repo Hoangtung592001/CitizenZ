@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const UserService = require('../dbserver/UserService');
 
+// service dùng để validate xem người dùng nhập tk, mk đúng chưa
 class Validate {
     // Check whether username existed or wrong password.
     async user(user) {

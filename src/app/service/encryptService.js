@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const UserService = require('../dbserver/UserService');
+
+// đây là service dùng đẻ mã hóa một thông tin.
 class EncryptService {
     
     async encryptSingle(info) {

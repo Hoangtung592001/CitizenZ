@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
+
+// middle ware check xem người dùng đăng nhập chưa
 module.exports = function(req, res, next) {
     // const accessToken = req.headers.authorization.split(' ')[1] || 
     const accessToken = req.cookies.token;

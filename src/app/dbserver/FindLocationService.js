@@ -3,6 +3,7 @@ const db = require('./models/City_Model');
 db.connect();
 
 class FindLocationService {
+    // Lấy tất cả các cities trên cả nước
     async getAllCities() {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -18,6 +19,8 @@ class FindLocationService {
             throw err;
         }
     }
+
+    // Lấy về các huyện trên một tỉnh nhất định
 
     async getAllDistricts(id) {
         try {
@@ -35,6 +38,8 @@ class FindLocationService {
         }
     }
 
+    // Lấy về các xã trên một huyện nhất định
+
     async getAllWards(id) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -50,6 +55,8 @@ class FindLocationService {
             throw err;
         }
     }
+
+    // Lấy về các làng trên một xã nhất định
 
     async getAllVillages(id) {
         try {
@@ -67,6 +74,8 @@ class FindLocationService {
         }
     }
 
+    // Lấy thông tin các tỉnh và xem tỉnh này khai báo xong chưa
+
     async getCitiesInfo() {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -82,6 +91,8 @@ class FindLocationService {
             console.log(err);
         }
     }
+
+
 
     async getInfoOfLevels(id) {
         try {
@@ -114,6 +125,8 @@ class FindLocationService {
         }
     }
 
+    // Lấy về thông tin về một tỉnh, huyện, xã nhưng không có thông tin users như kiểu khai báo xong chưa,...
+
     async getInfoOfLevelsNoUser(id) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -142,6 +155,8 @@ class FindLocationService {
         }
     }
 
+    // Lấy về các nước trên thế giới render vào form khai báo công dân.
+
     async getCountries() {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -158,14 +173,21 @@ class FindLocationService {
         }
     }
 
+    // Lấy về các dân tộc trên cả nước render vào form khai báo công dân.
+
     async getEthnicGroups() {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = 'SELECT * FROM ethnic_groups';
-                db.query(query, (err, result) => {
-                    if (err) reject(new Error(err.message));
-                    resolve(result);
-                })
+                try {
+                    db.query(query, (err, result) => {
+                        if (err) reject(new Error(err.message));
+                        resolve(result);
+                    })
+                }
+                catch(err) {
+                    reject(new Error(err.message));
+                }
             })
             return response;
         }

@@ -930,6 +930,7 @@ p {
 .statistics p {
     margin-top: 10px;
 }
+
 @media only screen and (min-width: 769px) {
     .web-view {
         display: flex;
@@ -1325,7 +1326,7 @@ p {
             
             var sttDiv = $("<div></div>").text(stt);
             console.log(sttDiv);
-            var nameDiv = $("<div></div>").text(name);
+            var nameDiv = $(`<a href='${stt}/city'></a>`).text(name);
             var statusDiv = $("<div></div>").text(status);
             var ppltDiv = $("<div></div>").text(population);
             sttDiv.addClass("c-1 bor-right-2");
