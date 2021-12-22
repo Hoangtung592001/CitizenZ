@@ -284,11 +284,7 @@ class InformationController {
     }
 
     async test(req, res, next) {
-        const user = req.user.user;
-        UserService.changeDatabase()
-            .then(districts => {
-                return res.json(districts);
-            })
+        
     }
 
     // Đây là hàm dùng để lấy Infomation của công dân của một thành phố

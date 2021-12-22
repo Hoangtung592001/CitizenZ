@@ -288,7 +288,6 @@ class UserService {
     async lockDeclaringAllCities() {
         try {
             const response = await new Promise(async (resolve, reject) => {
-
                 await FindLocationService.getAllCities()
                     .then(cities => {
                         cities.forEach(city => {
@@ -360,7 +359,7 @@ class UserService {
                             })
                         }
                         else {
-                            const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
+                            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
                             db.query(query, [username], async (err, result) => {
                                 if (err) return reject(new Error(err.message));
                                 await this.declaringDoneForWard(username.slice(0, username.length - 2));
@@ -384,7 +383,7 @@ class UserService {
             return childNodeUser.declaringDone;
         });
         if (result) {
-            const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
+            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
             db.query(query, [username], (err, result) => {
                 this.declaringDoneForDistrict(username.slice(0, username.length - 2));
             })
@@ -399,7 +398,7 @@ class UserService {
             return childNodeUser.declaringDone;
         });
         if (result) {
-            const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
+            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
             db.query(query, [username], (err, result) => {
                 this.declaringDoneForCity(username.slice(0, username.length - 2));
             })
@@ -414,7 +413,7 @@ class UserService {
             return childNodeUser.declaringDone;
         });
         if (result) {
-            const query = 'UPDATE users SET declaringDone = 1 WHERE username = ?';
+            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
             db.query(query, [username], (err, result) => {
                 this.declaringDoneForCity(username.slice(0, username.length - 2));
             })
@@ -447,6 +446,24 @@ class UserService {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 })
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async updatePrivileges(userId) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = 'SET declaringDone = CASE WHEN' + 
+                ' NOW() >= startTime AND NOW() <= expiryTime THEN TRUE ELSE FALSE END' +
+                ' WHERE username = ?';
+                db.query(query, [userId], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
             });
             return response;
         }

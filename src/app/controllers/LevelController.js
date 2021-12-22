@@ -209,28 +209,71 @@ class LevelController {
             })
     }
 
+    // Phân quyền từ admin về các thành phố.
     async grantPrivilegesForCities(req, res, next) {
-
+        const role = req.user.user.role;
+        if (role !== 'A1') {
+            return res.json({
+                error: true,
+                msg: 'Phân quyền thất bại vì bạn không có quyền này!'
+            })
+        }
+        const { startTime, expiryTime } = req.body;
+        await FindLocationService.getAllCities()
+            .then(cities => {
+                cities.forEach(async city => {
+                    await grantPrivileges(city.city_id, startTime, expiryTime);
+                });
+            });
+        return res.json({ 
+            error: false,
+            msg: 'Phân quyền khai báo thành công!'
+        });
     }
+    // Phân quyền cho các huyện, xã, làng
+    async grantPrivilegesForBelowLevel(req, res, next) {
+        const username = req.user.user.username;
+        // Nếu ở cấp làng thì không phân quyền được
+        if (username.length === 8) {
+            return res.json({ 
+                error: true,
+                msg: 'Bạn không có cấp dưới để phân'
+            });
+        }
+        const { startTime, expiryTime, id } = req.body;
+        await grantPrivileges(id, startTime, expiryTime);
+        // UserService.getUserNodeChild(username)
+        //     .then(async userChildren => {
+        //         await Promise.all(userChildren.map(async (userChild) => {
+        //             await grantPrivileges(userChild.username, startTime, expiryTime);
 
-    async grantPrivilegesForDistricts(req, res, next) {
-
+        //         }));
+        //     })
+        return res.json({ 
+            error: false,
+            msg: 'Phân quyền khai báo thành công!'
+        });
     }
-
-    async grantPrivilegesForWards(req, res, next) {
-        
-    }
-
-    async grantPrivilegesForVillages(req, res, next) {
-        
-    }
+    // Hàm xử lý cấp mã cho các con
 
     async grantCode(req, res, next) {
-        const username = req.user.user.username;
+        const { username, role } = req.user.user;
         const arrayOfId = req.body;
-        const isValid = arrayOfId.every(id => {
-            return id.length === username.length + 2 && id.indexOf(username) === 0;
-        });
+        let isValid;
+        // Nếu mà người dùng là A1 thì phân quyền cho các cities
+        if (role === 'A1') {
+            isValid = arrayOfId.every(id => {
+                return id.length === 2 && parseInt(id) >= 1 && parseInt(id) <= 63;
+            })
+        }
+        // Người dùng là cấp tỉnh, huyện, xã.
+        else {
+            isValid = arrayOfId.every(id => {
+                return id.length === username.length + 2 && id.indexOf(username) === 0 && id.length <= 8;
+            });
+        }
+        
+        // Check xem có cấp mã đúng hay không!
         if (!isValid) {
             return res.status(403).json({
                 error: true,
