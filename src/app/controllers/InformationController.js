@@ -5,17 +5,15 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const amqp = require("amqplib");
-const moment = require('moment');  
+const moment = require('moment');
 
 /*
 - Phân tích về tỷ lệ nam, nữ.
 - Phân tích về độ tuổi.
 - Phân tích về loại dân tộc.
 - Tình hình nhập liệu và hoàn thành nhập liệu.
-
 */
 class InformationController {
-
     home(req, res, next) {
         res.send('Nhập liệu thành công!');
     }
@@ -31,9 +29,9 @@ class InformationController {
                     });
                 }
             })
-        await Promise.all([UserService.checkPermission(user.username, 'B1'), UserService.checkPermission(user.username, 'B2')])
+        await Promise.all([UserService.checkPermission(user.username, 'B2')])
             .then(data => {
-                if (!data[1] && !data[0]) {
+                if (!data[0]) {
                     return res.json({
                         error: true,
                         msg: 'Người dùng không có quyền modify!'
@@ -48,9 +46,8 @@ class InformationController {
             })
         const citizen = req.body;
         if (!(citizen.citizen_id && citizen.citizen_name
-            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ'
-            && !citizen.occupation && !citizen.educational_level && !citizen.permanent_address && !citizen.temporary_address
-            ) 
+            && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ')
+            && citizen.occupation && citizen.educational_level && citizen.permanent_address && citizen.temporary_address
         )) {
             return res.json({
                 error: true,
@@ -94,9 +91,9 @@ class InformationController {
                     });
                 }
             })
-        await Promise.all([UserService.checkPermission(user.username, 'B1'), UserService.checkPermission(user.username, 'B2')])
+        await Promise.all([UserService.checkPermission(user.username, 'B1')])
             .then(data => {
-                if (!data[1] && !data[0]) {
+                if (!data[0]) {
                     return res.json({
                         error: true,
                         msg: 'Người dùng không có quyền modify!'
@@ -112,8 +109,8 @@ class InformationController {
         const citizen = req.body;
         if (!(citizen.citizen_id && citizen.citizen_name
             && (citizen.citizen_gender === 'Nam' || citizen.citizen_gender === 'Nữ')
-            && !citizen.occupation && !citizen.educational_level && !citizen.permanent_address && !citizen.temporary_address
-            && !citizen.village_id
+            && citizen.occupation && citizen.educational_level && citizen.permanent_address && citizen.temporary_address
+            && citizen.village_id
         )) {
             return res.json({
                 error: true,
@@ -121,7 +118,7 @@ class InformationController {
             });
         }
         citizen.village_id = user.username;
-        CitizenService.getCitizenById(citizen.citizen_id)
+        await CitizenService.getCitizenById(citizen.citizen_id)
             .then(data => {
                 if (data[0]) {
                     return res.status(400).json({
@@ -243,7 +240,10 @@ class InformationController {
                     });
                 }
                 // Check xem người này có quyền xóa công dân này không.
-                if (citizen[0].village_id !== user.username) {
+                if ( 
+                    citizen[0].village_id !== user.username 
+                    && (citizen[0].village_id.substring(0, 6) !== user.username)
+                ) {
                     return res.json({
                         error: true,
                         msg: 'Tài khoản này không có quyền xóa người dùng này!'
@@ -269,22 +269,26 @@ class InformationController {
     // Đây là hàm mà ví dụ một người muốn chuyển từ làng 1  qua làng 2 khác thì làng 1 sẽ gửi 
     // request cho làng 2 nếu làng 2 chấp nhận thì công dân sẽ được chuyển làng.
 
-    async confirmChangeInfo(req, res, next) {
-        const amqpServer = "amqp://localhost:5672";
-        const connection = await amqp.connect(amqpServer);
-        const channel = await connection.createChannel();
-        const QUEUE = `sendConfirm`
-        await channel.assertQueue('confirmMessage');
-        channel.consume(QUEUE, (data) => {
-            channel.sendToQueue('confirmMessage', Buffer.from('OK!'));
-            return res.send(JSON.parse(data.content));
-        }, {
-            noAck: true
-        })
-    }
+    // async confirmChangeInfo(req, res, next) {
+    //     const user = req.user.user;
+    //     const amqpServer = "amqp://localhost:5672";
+    //     const connection = await amqp.connect(amqpServer);
+    //     const channel = await connection.createChannel();
+    //     const QUEUE = `sendConfirm`
+    //     await channel.assertQueue('confirmMessage');
+    //     channel.consume(QUEUE, (data) => {
+    //         channel.sendToQueue('confirmMessage', Buffer.from('OK!'));
+    //         return res.send(JSON.parse(data.content));
+    //     }, {
+    //         noAck: true
+    //     })
+    // }
 
     async test(req, res, next) {
-        
+
+        var beginningTime = moment('2021-12-30 15:12:26');
+        var endTime = moment('2021-12-30 15:12:26');
+        return res.json(beginningTime.isBefore(endTime));
     }
 
     // Đây là hàm dùng để lấy Infomation của công dân của một thành phố
@@ -328,7 +332,7 @@ class InformationController {
 
     async declaringDone(req, res, next) {
         const user = req.user.user;
-        UserService.declaringDoneForVillage(user.username)
+        UserService.declaringDoneForWard(user.username)
             .then(isDone => {
                 if (!isDone) {
                     return res.json({

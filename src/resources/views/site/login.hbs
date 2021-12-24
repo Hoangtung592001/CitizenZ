@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CitizenV</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div id="container">
+        <div id="dangnhap">
+            <div id="dau">
+                <img src="images/dangcongsan.png" alt="Đảng Cộng Sản">
+                <div>
+                    Hệ Thống Quản Lý Dân Số
+                </div>
+            </div>
+            <div id="than">
+                <div class="flex-item" id="flex1">
+                    <img src="images/danso.png" alt="Đảng Cộng Sản">
+                    <div >
+                        CitizenV - Ứng dụng công nghệ vào quản lý dân số
+                    </div>
+                </div>
+                <form class="flex-item" id="flex2" method="POST" action="/login">
+                    <div id="pp">Sử dụng tài khoản bạn được cung cấp</div>
+                    <div class="dangnhap">
+                        <input type="text" placeholder="Tên tài khoản" id="taikhoan" name="username">
+                    </div>
+                    <div class="dangnhap" id="password">
+                        <input type="password" placeholder="Mật khẩu" name="password">
+                    </div>
+                    <div class="dangnhap" id="login">
+                        <button type="submit" onclick="login(this)">Đăng nhập</button>
+                    </div>
+                    <div id="forget">
+                        <button>Quên mật khẩu ?</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="js/login.js"></script>
+</body>
+</html>

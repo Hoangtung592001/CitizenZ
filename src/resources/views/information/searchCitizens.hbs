@@ -5,19 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citizen V</title>
-    <link rel="stylesheet" href="../css/cities.css">
+    <link rel="stylesheet" href="../../css/cities.css">
     <script src="https://kit.fontawesome.com/62a9d2ea85.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="icon" type = "image/x-icon" href="../images/logo.png" sizes="64x64">
+    <link rel="icon" type = "image/x-icon" href="../../images/logo.png" sizes="64x64">
 </head>
 <body>
     <div id="container" class = 'pos-relative'>
 
         <!----------------------------------------Nav Bar--------------------------------->
 
-        <div class="nav-bar">
+                <div class="nav-bar">
             <div class="leftSide">
-                <img src="../images/logoDhcn.png" alt="">
+                <img src="../../images/logoDhcn.png" alt="">
             </div>
             <div class="rightSide dp-flex">
                 <div class="web-view dp-flex">
@@ -171,7 +171,7 @@
             </div>
             <div class="singleUpdateInfo">
                 <label class = "leftSide-Label" for="">Tài khoản</label>
-                <input type="text" class = "username-register" value = "" disabled>
+                <input type="text" class = "username-register" value = "01" disabled>
             </div>
             <div class="singleUpdateInfo">
                 <label class = "leftSide-Label" for="registerPassword">Mật khẩu</label>
@@ -382,7 +382,8 @@
         </div>
         <div class = "text-warning">
             <p class = "announce-text">
-                Thời gian bắt đầu khai báo từ: <span class = "time_start"></span> đến <span class = "time_end"></span>
+                Thời gian bắt đầu khai báo từ: ... đến ...
+                
             </p>
         </div>
         <div class = "warningButtonField">
@@ -433,49 +434,11 @@
 </div>
 
         <!------------------------------------Body------------------------------------>
-    <div class="input-status-modal">
-        <div class = "currentLevelName title-web">
-            <p>{{unitName}}</p>
-        </div>
-        <div class = "search-citizen">
-            <form action="" class="search-form">
-           <input type="text" name = "citizen-name" class = "input-search" placeholder="Tìm kiếm người dân">
-            <button type = "submit" class = "button-search">
-                <i class="fas fa-search"></i>
-            </button>
-           </form>
-        </div>
-        <div class="main-web">
-            <div class="main-header">
-            </div>
-            <div class="list-header main fw-bold dis-flex">
-                <div class="c-1 r-1 bor-right-2 stt">
-                    STT
-                </div>
-                <div class="c-2 r-1 bor-right-2 mainLowLevelName">
-                    <p>Tên đơn vị<p>
-                </div>
-                <div class="c-3 r-1 bor-right-2 status">
-                    Tình trạng nhập liệu
-                </div>
-                <div class="c-4 r-1 population">
-                    Dân số
-                </div>
-            </div>
-        </div>
-    </div>
 
-
-<div class="info-citizen-modal" style = "display: none" >
+<div class="info-citizen-modal">
     <div class = "currentLevelName title-web">
         <p>Nước Việt Nam</p>
         <div style = "font-size: 16px;" class = "search-citizen">
-        <form action="">
-           <input type="text" name = "citizen-name" class = "input-search" placeholder="Tìm kiếm người dân">
-            <button type = "submit" class = "button-search">
-                <i class="fas fa-search"></i>
-            </button>
-           </form>
         </div>
     </div>
     <div class="main-web-info">
@@ -498,37 +461,35 @@
                 Nghề nghiệp
             </div>
             <div class="c-6-info r-1 village-id">
-                Mã làng
+                Quốc tịch
             </div>
-            
         </div>
-    </div>
-    <div class="updateInfo-Button completeButton">
-        <button type = 'submit'>HOÀN TẤT NHẬP</button>
-    </div>
-    <div class="updateInfo-Button">
-        <a href="/public/citizenDoc.doc" download>
-        <button type = 'submit'>Tải xuống phiếu</button>
-        </a>
+        {{#each citizens}}
+        <div class="dis-flex main">
+            <div class="c-1-info r-1 bor-right-2 stt">
+                {{this.citizen_id}}
+            </div>
+            <div class="c-2-info r-1 bor-right-2 name">
+                {{this.citizen_name}}
+            </div>
+            <div class="c-3-info r-1 bor-right-2 status">
+                {{this.citizen_gender}}
+            </div>
+            <div class="c-4-info r-1 bor-right-2 dob">
+                {{this.date_of_birth}}
+            </div>
+            <div class="c-5-info r-1 job">
+               {{this.occupation}}
+            </div>
+            <div class="c-6-info r-1 village-id">
+                {{this.citizen_nationality}}
+            </div>
+        </div>
+        {{/each}}
     </div>
     </div>
 </div>
-
-
-
-<!--------------------------------------------------Footer---------------------------------->
-        <div class = "statistics">
-            <p>Tổng dân số đã thống kê: <span class = "total-population">9999999</span></p>
-            <p>Tổng số nam: <span class = "male-citizens">120122</span></p>
-            <p>Tổng số nữ: <span class = "female-citizens">120301</span></p>
-            <p>Tổng số người trên độ tuổi lao động: <span class = "upperLabourAge"></span></p>
-            <p>Tổng số người trong độ tuổi lao động: <span class = "inLabourAge"></span></p>
-            <p>Tổng số người dưới độ tuổi lao động:  <span class = "underLabourAge"></span></p>
-        </div>
-
-
-
-
+        
         <!-------------------------------------Footer----------------------------------------->
     </div>
     <div class="cover pos-absolute" onclick = closeDropDown()>
@@ -536,13 +497,6 @@
     <div class="cover1 pos-absolute">
 
     </div>
-    <footer>
-        <div class = "footer">
-            <p>Trường ĐH Công Nghệ - ĐHQGHN</p>
-            <p>Tác giả: Lê Công Nam, Nguyễn Hoàng Tùng, Nguyễn Ngọc Quang (QNT)</p>
-            <p>Copyright <span><i class="far fa-copyright"></i></span> QNT 2021</p>
-        </div>
-    </footer>
-    <script src = '../js/villages.js'></script>
+    <script src = '../../js/searchCitizens.js'></script>
 </body>
 </html>

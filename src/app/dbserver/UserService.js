@@ -8,11 +8,9 @@ class UserService {
     // Thên một users mới
     async addUser(user) {
         try {
-            const salt = await bcrypt.genSalt(10);
-            user.password = await EncryptService.encryptSingle(user.password);
             const response = await new Promise((resolve, reject) => {
-                const query = 'INSERT INTO users SET ? ';
-                db.query(query, [user], (err, result) => {
+                const query = `INSERT INTO users(username, password, role) VALUES("${user.username}", "${user.password}", "${user.role}") `;
+                db.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 });
@@ -20,7 +18,7 @@ class UserService {
             return response === 1 ? true : false;
         }
         catch(err) {
-            console.log(error);
+            console.log(err);
         }
     }
 
@@ -28,8 +26,8 @@ class UserService {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = `UPDATE users SET` +  
-                    ` startTime = ${startTime}, expiryTime = ${expiryTime}` +
-                    ` WHERE userId = ${id}`;
+                    ` startTime = '${startTime}', expiryTime = '${expiryTime}'` +
+                    ` WHERE username = ${id}`;
                 db.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -65,7 +63,7 @@ class UserService {
     }
 
     // Lấy về users qua tên đăng nhập.
-
+    // UserService.getUserByUsername
     async getUserByUsername(username) {
         try {
             const response = await new Promise((resolve, reject) => {
@@ -88,10 +86,10 @@ class UserService {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = `UPDATE users` + 
-                ` SET password = ? WHERE username = "${username}"`;
-                db.query(query, [newPassword], (err, result) => {
+                ` SET password = '${newPassword}' WHERE username = '${username}'`;
+                db.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
-                    resolve(result.affectedRows);
+                    resolve(result);
                 });
             });
             return response;
@@ -344,10 +342,9 @@ class UserService {
             console.log(err);
         }
     }
+    // Xác nhận Khai báo xong cho một xã
 
-    // Xác nhận Khai báo xong cho một làng
-
-    async declaringDoneForVillage(username) {
+    async declaringDoneForWard(username) {
         try {
             const response = await new Promise((resolve, reject) => {
                 this.getUserByUsername(username)
@@ -359,10 +356,10 @@ class UserService {
                             })
                         }
                         else {
-                            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
+                            const query = 'UPDATE users SET declaringDone = 0, startTime = NULL, expiryTime = NULL WHERE username = ?';
                             db.query(query, [username], async (err, result) => {
                                 if (err) return reject(new Error(err.message));
-                                await this.declaringDoneForWard(username.slice(0, username.length - 2));
+                                await this.declaringDoneForDistrict(username.slice(0, username.length - 2));
                                 resolve(true);
                             })
                         }
@@ -372,21 +369,6 @@ class UserService {
         }
         catch(err) {
             console.log(err);
-        }
-    }
-
-    // Xác nhận Khai báo xong cho một xã
-
-    async declaringDoneForWard(username) {
-        const childNodeUsers = await this.getUserNodeChild(username);
-        const result = childNodeUsers.every(childNodeUser => {
-            return childNodeUser.declaringDone;
-        });
-        if (result) {
-            const query = 'UPDATE users SET declaringDone = 1, startTime = NULL, expiryTime = NULL WHERE username = ?';
-            db.query(query, [username], (err, result) => {
-                this.declaringDoneForDistrict(username.slice(0, username.length - 2));
-            })
         }
     }
 
@@ -420,10 +402,23 @@ class UserService {
         }
     }
 
-    async grantCode(id) {
+    async grantCode(id, name, parentId) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = `INSERT INTO identification_for_levels VALUES('${id}')`;
+                let query;
+                if (id.length === 2) {
+                    query = `INSERT INTO cities(city_id, name) VALUES('${id}', '${name}')`;
+                }
+                else if (id.length === 4) {
+                    query = `INSERT INTO districts(district_id, name, city_id) VALUES('${id}', '${name}', '${parentId}')`;
+                }
+                else if (id.length === 6) {
+                    query = `INSERT INTO wards(ward_id, name, district_id) VALUES('${id}', '${name}', '${parentId}')`;
+                }
+                else if (id.length === 8) {
+                    query = `INSERT INTO villages(village_id, name, ward_id) VALUES('${id}', '${name}', '${parentId}')`;
+                }
+                // const query = `INSERT INTO identification_for_levels VALUES('${id}')`;
                 db.query(query, (err, result) => {
                     if (err) reject(new Error(err.message))
                     else {
@@ -441,7 +436,19 @@ class UserService {
     async findGrantedCode(id) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = 'SELECT * FROM identification_for_levels WHERE id = ?';
+                let query;
+                if (id.length === 2) {
+                    query = 'SELECT * FROM cities WHERE city_id = ?';
+                }
+                else if (id.length === 4) {
+                    query = 'SELECT * FROM districts WHERE district_id = ?';
+                }
+                else if (id.length === 6) {
+                    query = 'SELECT * FROM wards WHERE ward_id = ?';
+                }
+                else if (id.length === 8) {
+                    query = 'SELECT * FROM villages WHERE village_id = ?';
+                }
                 db.query(query, [id], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -464,6 +471,34 @@ class UserService {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 });
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async grantedUser(id) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                let query;
+                if (id === 'city') {
+                    query = 'SELECT * FROM cities c JOIN users u ON c.city_id = u.username';
+                }
+                else if (id.length === 2) {
+                    query = 'SELECT * FROM districts d JOIN users u ON d.district_id = u.username WHERE d.city_id = ?';
+                }
+                else if (id.length === 4) {
+                    query = 'SELECT * FROM wards w JOIN users u ON w.ward_id = u.username WHERE w.district_id = ?';
+                }
+                else if (id.length === 6) {
+                    query = 'SELECT * FROM villages v JOIN users u ON v.village_id = u.username WHERE v.ward_id = ?';
+                }
+                db.query(query, [id], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
             });
             return response;
         }

@@ -110,10 +110,38 @@ class FindLocationService {
                 else if (id.length === 6) {
                     query = 'SELECT v.*, u.declaringDone FROM villages v JOIN users u ON v.village_id = u.username WHERE v.ward_id = ?';
                 }
-                else if (id.length === 8) {
+                else {
                     query = 'SELECT * FROM citizens c WHERE c.village_id = ?';
                 }
                 db.query(query, [id], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+
+    async getInfoOfLevel(id) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                let query;
+                if (id.length === 2) {
+                    query = `SELECT * FROM cities WHERE city_id = ${id}`;
+                }
+                else if (id.length === 4) {
+                    query = `SELECT * FROM districts WHERE district_id = ${id}`;
+                }
+                else if (id.length === 6) {
+                    query = `SELECT * FROM wards WHERE ward_id = ${id}`;
+                }
+                else {
+                    query = `SELECT * FROM villages WHERE village_id = ${id}`;
+                }
+                db.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 })

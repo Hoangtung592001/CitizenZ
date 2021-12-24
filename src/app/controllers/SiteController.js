@@ -18,7 +18,7 @@ class SiteController {
         FindLocationService.getCitiesInfo()
             .then(cities => {
                 // res.json(cities);
-                res.render('site/cities', { cities });
+                res.render('site/cities', { username: user.username, role: user.role });
             })
     }
 
@@ -40,10 +40,13 @@ class SiteController {
                 msg: 'Người dùng không có quyền truy cập miền này!'
             })
         }
-        FindLocationService.getInfoOfLevels(city_id)
-            .then(districts => {
-                // res.json(districts);
-                res.render('site/districts', { districts });
+        FindLocationService.getInfoOfLevel(city_id)
+            .then(city => {
+                FindLocationService.getInfoOfLevels(city_id)
+                    .then(districts => {
+                        // res.json(districts);
+                        res.render('site/districts', { username: user.username, role: user.role, unitName: city[0].name });
+                    })
             })
     }
 
@@ -65,10 +68,13 @@ class SiteController {
                 msg: 'Người dùng không có quyền truy cập miền này!'
             })
         }
-        FindLocationService.getInfoOfLevels(district_id) 
-            .then(wards => {
-                // res.json(wards);
-                res.render('site/wards', { wards });
+        FindLocationService.getInfoOfLevel(district_id)
+            .then(district => {
+                FindLocationService.getInfoOfLevels(district_id) 
+                    .then(wards => {
+                        // res.json(wards);
+                        res.render('site/wards', { username: user.username, role: user.role, unitName: district[0].name });
+                    })
             })
     }
 
@@ -90,11 +96,14 @@ class SiteController {
                 msg: 'Người dùng không có quyền truy cập miền này!'
             })
         }
-        FindLocationService.getInfoOfLevels(ward_id) 
-            .then(villages => {
-                // res.json(villages)
-                res.render('site/villages', { villages });
-            })
+        FindLocationService.getInfoOfLevel(ward_id)
+            .then(ward => {
+                FindLocationService.getInfoOfLevels(ward_id) 
+                    .then(villages => {
+                        // res.json(villages)
+                        res.render('site/villages', { username: user.username, role: user.role, unitName: ward[0].name });
+                    })
+            })   
     }
 
     // Render ra người dân của một làng, xã
@@ -115,11 +124,14 @@ class SiteController {
                 msg: 'Người dùng không có quyền truy cập miền này!'
             })
         }
-        FindLocationService.getInfoOfLevels(village_id) 
-            .then(citizens => {
-                // res.json(citizens)
-                res.render('site/citizens', { citizens });
-            })
+        FindLocationService.getInfoOfLevel(village_id)
+            .then(village => {
+                FindLocationService.getInfoOfLevels(village_id) 
+                    .then(citizens => {
+                        // res.json(citizens)
+                        res.render('site/citizens', { citizens, unitName: village[0].name });
+                    })
+        })
     }
 
     // Hàm này đặc biệt là khi id truyền vào là city thì trả về các tỉnh trong cả nước
@@ -137,9 +149,31 @@ class SiteController {
     }
 
     login_site(req, res, next) {
-        res.render('login');
+        const accessToken = req.cookies.token;
+        if (accessToken) {
+            jwt.verify(accessToken, process.env.AUTH_SECRET, function(err, user) {
+                const username = user.user.username
+                if (username.length === 2) {
+                    res.redirect(`/${username}/city`);
+                }
+                else if (username.length === 4) {
+                    res.redirect(`/${username}/district`);
+                }
+                else if (username.length === 6) {
+                    res.redirect(`/${username}/ward`);
+                }
+                else if (username.length === 8) {
+                    res.redirect(`/${username}/citizen`);
+                }
+                else {
+                    res.redirect('/all_city');
+                }
+            })
+        }
+        else {
+            res.render('site/login');
+        }
     }
-
     // Hàm đăng ký tuy nhiên không cần lắm
 
     async signup(req, res, next) {
@@ -271,6 +305,49 @@ class SiteController {
                     })
             })
     }
+
+    async setPassword(req, res, next) {
+        const user = req.user.user;
+        const { oldPassword, newPassword, confirmNewPassword } = req.body;
+        const oldUser = {
+            username: user.username,
+            password: oldPassword
+        }
+        if (newPassword.length < 6) {
+            return res.json({
+                error: true,
+                msg: 'Bạn phải nhập ít nhất 6 ký tự!'
+            });
+        }
+        if (newPassword !== confirmNewPassword) {
+            return res.json({
+                error: true,
+                msg: 'Bạn nhập sai xác nhận mật khẩu'
+            })
+        }
+        await UserService.getUserByUsername(user.username)
+            .then(async foundUser => {
+                foundUser = foundUser[0];
+                Validate.user(oldUser)
+                    .then(async data => {
+                        if (data.error) {
+                            return res.json({
+                                error: true,
+                                msg: 'Bạn nhập sai mật khẩu!'
+                            })
+                        }
+                        else {
+                            const encryptedPassword = await EncryptService.encryptSingle(newPassword);
+                            await UserService.setPassword(user.username, encryptedPassword);
+                            return res.json({
+                                error: false,
+                                msg: 'Đổi mật khẩu thành công!'
+                            })
+                        }
+                    })
+            })
+        
+    }
     
     async forgetPassword(req, res, next) {
         let payload = req.body.username;
@@ -303,9 +380,7 @@ class SiteController {
 
     forgetPasswordSite(req, res, next) {
         res.render('site/forgetPassword');
-    }
-
-    
+    }    
 }
 
 module.exports = new SiteController();

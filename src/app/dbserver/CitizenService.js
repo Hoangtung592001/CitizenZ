@@ -105,32 +105,32 @@ class CitizenService {
                 const findCitizenQuery = 'SELECT * FROM citizens WHERE citizen_id = ?';
                 db.query(findCitizenQuery, [citizen_id], async (err, foundCitizen) => {
                     // Trường hợp không thay đổi làng.
-                    if (citizen.village_id === foundCitizen[0].village_id) {
-                        const query = `UPDATE citizens` + 
-                        ` SET ? WHERE citizen_id = "${citizen_id}"`;
-                        db.query(query, [citizen], (err, result) => {
-                            if (err) reject(new Error(err.message));
-                            resolve(result);
-                        });
-                    }
-                    // Trường hợp thay đổi làng.
-                    else {
-                        const amqpServer = "amqp://localhost:5672";
-                        const connection = await amqp.connect(amqpServer);
-                        const channel = await connection.createChannel();
-                        const QUEUE = `sendConfirm`
-                        await channel.assertQueue(QUEUE);
-                        //http://localhost:5000/information/confirm_changeInfo
-                        await sendByMail.confirmChangePassword('Xác nhận chuyển nơi ở', 'http://localhost:5000/information/confirm_changeInfo');
-                        channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(citizen)));
-                        channel.consume('confirmMessage', async (msg) => {
-                            await this.deleteCitizen(foundCitizen[0]);
-                            await this.addCitizen(citizen);
-                            resolve(true);
-                        }, {
-                            noAck: true
-                        });
-                    }
+                    const query = `UPDATE citizens` + 
+                    ` SET ? WHERE citizen_id = "${citizen_id}"`;
+                    db.query(query, [citizen], (err, result) => {
+                        if (err) reject(new Error(err.message));
+                        resolve(result);
+                    });
+                    // if (citizen.village_id === foundCitizen[0].village_id) {
+                    // }
+                    // // Trường hợp thay đổi làng.
+                    // else {
+                    //     const amqpServer = "amqp://localhost:5672";
+                    //     const connection = await amqp.connect(amqpServer);
+                    //     const channel = await connection.createChannel();
+                    //     const QUEUE = `sendConfirm`
+                    //     await channel.assertQueue(QUEUE);
+                    //     //http://localhost:5000/information/confirm_changeInfo
+                    //     await sendByMail.confirmChangePassword('Xác nhận chuyển nơi ở', 'http://localhost:5000/information/confirm_changeInfo');
+                    //     channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(citizen)));
+                    //     channel.consume('confirmMessage', async (msg) => {
+                    //         await this.deleteCitizen(foundCitizen[0]);
+                    //         await this.addCitizen(citizen);
+                    //         resolve(true);
+                    //     }, {
+                    //         noAck: true
+                    //     });
+                    // }
                 });
             });
             return response;
@@ -153,7 +153,7 @@ class CitizenService {
                                 msg: 'Lỗi không tìm thấy người dùng!'
                             });
                         }
-                        if (!checkingUser.canModify) {
+                        if (!checkingUser.declaringDone) {
                             resolve({
                                 error: true,
                                 msg: 'Tài khoản này bị khóa tất cả các quyền!'

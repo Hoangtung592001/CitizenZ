@@ -14,6 +14,10 @@ router.post('/declaration', auth,  informationController.declaration);
 
 router.get('/declaration', auth, informationController.declarationSite);
 
+router.post('/declarationByB1', auth,  informationController.declarationByB1);
+
+// router.get('/declarationByB1', auth, informationController.declarationByB1Site);
+
 router.get('/change_info/:citizen_id', auth, informationController.changeInfoSite);
 
 router.put('/change_info/:citizen_id', auth, informationController.changeInfo);
@@ -22,7 +26,7 @@ router.get('/get_info_citizen_cities', auth, informationController.getInfoCitize
 
 router.delete('/delete_citizen/:citizen_id', auth, informationController.deleteCitizen);
 
-router.get('/confirm_changeInfo', auth, informationController.confirmChangeInfo);
+// router.get('/confirm_changeInfo', auth, informationController.confirmChangeInfo);
 
 router.post('/declaringDone', auth, informationController.declaringDone);
 

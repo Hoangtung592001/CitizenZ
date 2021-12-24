@@ -28,7 +28,7 @@ router.post('/signup', SiteController.signup);
 
 router.post('/login', SiteController.login);
 
-router.post('/forget_password', SiteController.sendMessageConfirmResetPassword);
+router.post('/set_password', auth, SiteController.setPassword);
 
 router.get('/:id', SiteController.getData);
 

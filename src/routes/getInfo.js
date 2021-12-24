@@ -6,6 +6,12 @@ const getInfoController = require('../app/controllers/GetInfoController');
 
 router.get('/get_info_by_search/:searchValue', auth, getInfoController.getInfoBySearch);
 
-router.get('/analyse_population', auth, getInfoController.analysePopulation);
+router.post('/analyse_population', auth, getInfoController.analysePopulation);
+
+router.get('/user_info', auth, getInfoController.getUserInfo);
+
+router.get('/granted_user', auth, getInfoController.gratedUser);
+
+router.get('/granted_time_user', auth, getInfoController.grantedTimeUser);
 
 module.exports = router;
