@@ -164,6 +164,7 @@ class SiteController {
         const accessToken = req.cookies.token;
         if (accessToken) {
             jwt.verify(accessToken, process.env.AUTH_SECRET, function(err, user) {
+                if (err) res.render('site/login');
                 const username = user.user.username
                 if (username.length === 2) {
                     res.redirect(`/${username}/city`);

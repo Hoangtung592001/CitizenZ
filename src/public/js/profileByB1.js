@@ -12,7 +12,6 @@ var trinhdovanhoa = "";
 var nghenghiep = "";
 var lang = "";
 
-console.log(window.location.href.slice(34));
  
 function gangiatri() {
  
@@ -97,7 +96,15 @@ function nop() {
     })
     .then(data => data.json())
     .then(response => {
-        notitext.innerText = response.msg;
+        if (response.error) {
+            notitext.innerText = response.msg;
+        }
+        else {
+            notitext.innerText = response.msg;
+            setTimeout(() => {
+                location.replace("/")
+            }, 2000)
+        }
     })
 }
  

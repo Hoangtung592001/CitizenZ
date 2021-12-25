@@ -82,7 +82,15 @@ function chinhsua() {
     })
     .then(data => data.json())
     .then(response => {
-        notitext.innerText = response.msg;
+        if (response.error) {
+            notitext.innerText = response.msg;
+        }
+        else {
+            notitext.innerText = response.msg;
+            setTimeout(() => {
+                location.replace("/")
+            }, 2000)
+        }
     })
 }
  
@@ -112,11 +120,16 @@ function xoa() {
     })
     .then(data => data.json())
     .then(response => {
-        notitext.innerText = response.msg;
+        if (response.error) {
+            notitext.innerText = response.msg;
+        }
+        else {
+            notitext.innerText = response.msg;
+            setTimeout(() => {
+                location.replace("/")
+            }, 2000)
+        }
     })
-    setTimeout(() => {
-        location.replace("/")
-    }, 2000)
 }
 
 fetch('http://localhost:5000/information/get_ethnic_groups')
