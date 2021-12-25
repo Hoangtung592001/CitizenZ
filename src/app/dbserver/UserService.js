@@ -348,7 +348,7 @@ class UserService {
         try {
             const response = await new Promise((resolve, reject) => {
                 this.getUserByUsername(username)
-                    .then(user => {
+                    .then(async user => {
                         if (!user[0]) {
                             resolve({
                                 error: true,
@@ -356,6 +356,13 @@ class UserService {
                             })
                         }
                         else {
+                            await this.getUserNodeChild(username)
+                                .then(async children => {
+                                    await Promise.all(children.map(async child => {
+                                        const updateQuery = 'UPDATE users SET declaringDone = 0, startTime = NULL, expiryTime = NULL WHERE username = ?';
+                                        db.query(updateQuery, [child.username]);
+                                    }))
+                                });
                             const query = 'UPDATE users SET declaringDone = 0, startTime = NULL, expiryTime = NULL WHERE username = ?';
                             db.query(query, [username], async (err, result) => {
                                 if (err) return reject(new Error(err.message));

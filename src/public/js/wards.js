@@ -666,7 +666,7 @@ fetch(url)
     .then(data => data.json())
     .then(wards => {
         wards.forEach(ward => {
-            addInfo(ward.ward_id, ward.name, ward.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', ward.population, `http://localhost:5000/${ward.ward_id}/ward`);
+            addInfo(ward.ward_id, ward.name, ward.declaringDone ? 'Nhập liệu thành công!': 'Đang nhập liệu!', ward.population, `http://localhost:5000/${ward.ward_id}/ward`);
         });
     })
 

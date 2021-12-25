@@ -673,7 +673,7 @@ fetch(url)
     .then(data => data.json())
     .then(villages => {
         villages.forEach(village => {
-            addInfo(village.village_id, village.name, village.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', village.population, `http://localhost:5000/${village.village_id}/citizen`);
+            addInfo(village.village_id, village.name, village.declaringDone ? 'Nhập liệu thành công!': 'Đang nhập liệu!', village.population, `http://localhost:5000/${village.village_id}/citizen`);
         });
     })
 

@@ -311,6 +311,14 @@ fetch('http://localhost:5000/get_info/user_info')
                     $('.username-register').val(defaultValueRegister);
                 })
             })
+        const url = window.location.href.slice(0, 30);
+        fetch(url)
+            .then(data => data.json())
+            .then(citizens => {
+                citizens.forEach(citizen => {
+                    addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality);
+                });
+            })
     }
     else if (user.role === 'A2') {
         hideAddInfoCitizen();
@@ -324,6 +332,14 @@ fetch('http://localhost:5000/get_info/user_info')
                     const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
                     $('.username-register').val(defaultValueRegister);
                 })
+            })
+        const url = window.location.href.slice(0, 30);
+        fetch(url)
+            .then(data => data.json())
+            .then(citizens => {
+                citizens.forEach(citizen => {
+                    addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality);
+                });
             })
     }
     else if (user.role === 'A3') {
@@ -339,9 +355,21 @@ fetch('http://localhost:5000/get_info/user_info')
                     $('.username-register').val(defaultValueRegister);
                 })
             })
+        const url = window.location.href.slice(0, 30);
+        fetch(url)
+            .then(data => data.json())
+            .then(citizens => {
+                citizens.forEach(citizen => {
+                    addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality);
+                });
+            })
     }
     else if (user.role === 'B1') {
         showBelowB1Button();
+        $('.addInfoCitizen').click((e)=> {
+            e.preventDefault();
+            window.location.href = "http://localhost:5000/information/declarationByB1";
+        })
         fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
             .then(data => data.json())
             .then(villages => {
@@ -353,9 +381,29 @@ fetch('http://localhost:5000/get_info/user_info')
                     $('.username-register').val(defaultValueRegister);
                 })
             })
+        const url = window.location.href.slice(0, 30);
+        fetch(url)
+            .then(data => data.json())
+            .then(citizens => {
+                citizens.forEach(citizen => {
+                    addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality, `http://localhost:5000/information/change_info_by_b1/${citizen.citizen_id}`);
+                });
+            })
     }
     else if (user.role === 'B2') {
         hideFunctionB2();
+        $('.addInfoCitizen').click((e)=> {
+            e.preventDefault();
+            window.location.href = "http://localhost:5000/information/declaration";
+        })
+        const url = window.location.href.slice(0, 30);
+        fetch(url)
+            .then(data => data.json())
+            .then(citizens => {
+                citizens.forEach(citizen => {
+                    addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality, `http://localhost:5000/information/change_info_by_b2/${citizen.citizen_id}`);
+                });
+            })
     }
 })
 
@@ -388,7 +436,7 @@ function modifyTimeDeadline(dateAndTimeStart, dateAndTimeEnd) {
     $('.time-end-deadline').val(timeEnd);
     $('.date-end-deadline').val(dateEnd);
 }
- 
+
 // test modify Time deadline
 // var timeStartTest = "2021-09-20 11:59:00";
 // var timeEndTest = "2021-11-20 11:58:00";

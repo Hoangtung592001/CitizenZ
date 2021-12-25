@@ -453,11 +453,7 @@ function onAnnounce() {
 fetch('http://localhost:5000/get_info/user_info')
     .then(data => data.json())
     .then(user => {
-        // yyyy/mm/ddT08:
-        // "2021-12-31T08:01:03.000Z"   expiry
-        // "2021-12-01T08:01:00.000Z"   start
         if (user.startTime === 'Invalid date' || user.expiryTime === 'Invalid date') {
-            // 2021-12-24 15:36:21
             user.startTime = "0000-00-00 00:00:00";
             user.expiryTime = "0000-00-00 00:00:00";
             modifyTimeDeadline(user.startTime, user.expiryTime);

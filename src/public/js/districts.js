@@ -668,7 +668,7 @@ fetch(url)
     .then(data => data.json())
     .then(districts => {
         districts.forEach(district => {
-            addInfo(district.district_id, district.name, district.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', district.population, `http://localhost:5000/${district.district_id}/district`);
+            addInfo(district.district_id, district.name, district.declaringDone ? 'Nhập liệu thành công!': 'Đang nhập liệu!', district.population, `http://localhost:5000/${district.district_id}/district`);
         });
     })
 

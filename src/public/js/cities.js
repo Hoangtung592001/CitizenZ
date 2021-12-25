@@ -667,7 +667,7 @@ fetch(url)
     .then(data => data.json())
     .then(cities => {
         cities.forEach(city => {
-            addInfo(city.city_id, city.name, city.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', city.population, `http://localhost:5000/${city.city_id}/city`);
+            addInfo(city.city_id, city.name, city.declaringDone ? 'Nhập liệu thành công!': 'Đang nhập liệu!', city.population, `http://localhost:5000/${city.city_id}/city`);
         });
     })
 
