@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const Validate = require('../service/validate');
 const sendByMail = require('../service/sendMessagesThroughGmail');
 const FindLocationService = require('../dbserver/FindLocationService');
+const moment = require('moment');
 class SiteController {
     // Hàm render ra các tỉnh trong cả nước
     getCities(req, res, next) {
@@ -129,7 +130,7 @@ class SiteController {
                 FindLocationService.getInfoOfLevels(village_id) 
                     .then(citizens => {
                         // res.json(citizens)
-                        res.render('site/citizens', { citizens, unitName: village[0].name });
+                        res.render('site/citizens', { citizens, unitName: village[0].name, username: user.username, role: user.role });
                     })
         })
     }
@@ -144,7 +145,18 @@ class SiteController {
         const id = req.params.id;
         FindLocationService.getInfoOfLevels(id)
             .then(data => {
-                return res.json(data);
+                try {
+                    if (data[0].date_of_birth) {
+                        data = data.map(citizen => {
+                            citizen.date_of_birth = moment(citizen.date_of_birth).format('YYYY-MM-DD');
+                            return citizen;
+                        })
+                    }
+                    return res.json(data);
+                }
+                catch(err) {
+
+                }
             }) 
     }
 

@@ -21,7 +21,7 @@ class GetInfoController {
                 if (role !== 'A1') {
                     citizens = citizens.filter(citizen => citizen.village_id.indexOf(username) === 0)
                 }
-                return res.render('information/searchCitizens', { citizens: citizens });
+                return res.render('information/searchCitizens', { citizens: citizens, username: username, role: role });
                 // return res.json(accessedCitizens);
             })
             .catch(err => {
@@ -117,6 +117,14 @@ class GetInfoController {
                 return res.json(users);
                 //users.filter(user => !user.startTime && !user.expiryTime)
             })
+    }
+
+    async getInfoLevel(req, res, next) {
+        const id = req.params.id;
+        FindLocationService.getInfoOfLevelsNoUser(id)
+            .then(data => {
+                return res.json(data);
+            }) 
     }
 
 }

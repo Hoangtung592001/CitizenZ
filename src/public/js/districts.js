@@ -73,6 +73,7 @@ function hideAndShow(modal, showButton, hideButton) {
         $(modal).hide();
     })
 }
+hideAndShow('.alert-modal','','.alert-confirm-button');
 
 hideAndShow('.update-modal','.updateInfoMain','.cancelUpdate');
 
@@ -149,7 +150,14 @@ for(var i = 0; i < 99; i++) {
     //addInfoCitizenByB2(i, 'Lê Công Nam', 'Nam', '01/02/2001', 'IT','1','https://google.com');
 }
 
-function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+async function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+    await fetch('http://localhost:5000/get_info/user_info')
+        .then(data => data.json())
+        .then(user => {
+            if (user.role === 'A1') {
+                return true;
+            }
+        })
     if (dateStart > dateEnd
         || dateStart < dateStartDL
         ||  dateEnd > dateEndDL
@@ -179,7 +187,12 @@ function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateS
 }
 
 $('.confirmButton').click(() => {
-    $('.alert-modal').hide();
+    $('.confirmedButton').click(() => {
+        fetch('http://localhost:5000/information/declaringDone', {
+            method: 'POST'
+        })
+        $('.warning-modal').hide();
+    })
 })
 
 hideAndShow('.announce-modal','','.announce-confirm-button');
@@ -250,7 +263,7 @@ $('.givePMSButton').click((e) => {
         // data cho fetch
         const date_and_time_start = date_start + " " + time_start + ":00";
         const date_and_time_end = date_end + " " + time_end + ":00";
-        const id = $('.select-give-PMS').find('option:selected').attr('data-id');
+        const id = $('.select-give-PMS').children('option:selected').attr('data-id');
         // ----------
         date_start = modifyDate(date_start);
         date_end = modifyDate(date_end);
@@ -429,57 +442,71 @@ $('.submit-id-button').click((e) => {
         $('.invalid-modal').show();
     }
 })
+function hideTimeDeadline() {
+    $('.belowA1').hide();
+}
 
 fetch('http://localhost:5000/get_info/user_info')
-    .then(data => data.json())
-    .then(user => {
-        console.log(user);
-        if (user.role === 'A1') {
-            fetch('http://localhost:5000/city')
-                .then(data => data.json())
-                .then(cities => {
-                    cities.forEach((city, index) => {
-                        addValueToSelectTag('.select-name-register', city.name, city.city_id);
-                        addValueToSelectTag('.select-give-PMS', city.name, city.city_id);
-                        addGivenId(index + 1, city.name, city.city_id);
-                    })
+.then(data => data.json())
+.then(user => {
+    if (user.role === 'A1') {
+        hideAddInfoCitizen();
+        hideTimeDeadline();
+        fetch('http://localhost:5000/get_info/get_info_levels/city')
+            .then(data => data.json())
+            .then(cities => {
+                cities.forEach((city, index) => {
+                    addValueToSelectTag('.select-name-register', city.name, city.city_id);
+                    addValueToSelectTag('.select-give-PMS', city.name, city.city_id);
+                    addGivenId(index + 1, city.name, city.city_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'A2') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(districts => {
-                    districts.forEach((district, index) => {
-                        addValueToSelectTag('.select-name-register', district.name, district.district_id);
-                        addValueToSelectTag('.select-give-PMS', district.name, district.district_id);
-                        addGivenId(index + 1, district.name, district.district_id);
-                    })
+            })
+    }
+    else if (user.role === 'A2') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(districts => {
+                districts.forEach((district, index) => {
+                    addValueToSelectTag('.select-name-register', district.name, district.district_id);
+                    addValueToSelectTag('.select-give-PMS', district.name, district.district_id);
+                    addGivenId(index + 1, district.name, district.district_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'A3') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(wards => {
-                    wards.forEach((ward, index) => {
-                        addValueToSelectTag('.select-name-register', ward.name, ward.ward_id);
-                        addValueToSelectTag('.select-give-PMS', ward.name, ward.ward_id);
-                        addGivenId(index + 1, ward.name, ward.ward_id);
-                    })
+            })
+    }
+    else if (user.role === 'A3') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(wards => {
+                wards.forEach((ward, index) => {
+                    addValueToSelectTag('.select-name-register', ward.name, ward.ward_id);
+                    addValueToSelectTag('.select-give-PMS', ward.name, ward.ward_id);
+                    addGivenId(index + 1, ward.name, ward.ward_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'B1') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(villages => {
-                    console.log(villages);
-                    villages.forEach((village, index) => {
-                        addValueToSelectTag('.select-name-register', village.name, village.village_id);
-                        addValueToSelectTag('.select-give-PMS', village.name, village.village_id);
-                        addGivenId(index + 1, village.name, village.village_id);
-                    })
+            })
+    }
+    else if (user.role === 'B1') {
+        showBelowB1Button();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(villages => {
+                villages.forEach((village, index) => {
+                    addValueToSelectTag('.select-name-register', village.name, village.village_id);
+                    addValueToSelectTag('.select-give-PMS', village.name, village.village_id);
+                    addGivenId(index + 1, village.name, village.village_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-    })
+            })
+    }
+})
 
 // Thêm vào bảng đã cấp quyền
 function addGivenPMS(stt, name, dateAndTimeStart, dateAndTimeEnd) {
@@ -563,7 +590,7 @@ fetch('http://localhost:5000/get_info/granted_user', {
 .then(data => data.json())
 .then(data => {
     data.forEach((unit, index) => {
-        addProvidedAccount(index + 1, unit.name, unit.district_id);
+        addProvidedAccount(index + 1, unit.name, unit.city_id);
     })
 });
 
@@ -625,8 +652,13 @@ $('.button-search').click((e)=> {
 	$('.search-form').submit();
 })
 
-var defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
-$('.username-register').val(defaultValueRegister);
+function showBelowB1Button() {
+    $('.belowB1Button').show();
+}
+ 
+function hideAddInfoCitizen() {
+    $('.addInfoCitizen').hide();
+}
 
 // Trang cần đổi url
 
@@ -636,7 +668,7 @@ fetch(url)
     .then(data => data.json())
     .then(districts => {
         districts.forEach(district => {
-            addInfo(district.district_id, district.name, district.declaringDone ? 'Nhập liệu thành công!' : 'Đang nhập liệu!', district.population, `http://localhost:5000/${district.district_id}/district`);
+            addInfo(district.district_id, district.name, district.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', district.population, `http://localhost:5000/${district.district_id}/district`);
         });
     })
 

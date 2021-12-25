@@ -14,4 +14,6 @@ router.get('/granted_user', auth, getInfoController.gratedUser);
 
 router.get('/granted_time_user', auth, getInfoController.grantedTimeUser);
 
+router.get('/get_info_levels/:id', getInfoController.getInfoLevel);
+
 module.exports = router;

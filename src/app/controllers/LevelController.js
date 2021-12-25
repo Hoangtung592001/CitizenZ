@@ -349,6 +349,12 @@ class LevelController {
         await UserService.getUserByUsername(username)
             .then(async foundUser => {
                 foundUser = foundUser[0];
+                if (foundUser.declaringDone) {
+                    return res.json({
+                        error: true,
+                        msg: 'Bạn chưa được quyền cấp thời gian khai báo!'
+                    })
+                }
                 if (
                     moment(foundUser.startTime).isAfter(moment(startTime))
                     || moment(foundUser.expiryTime).isBefore(moment(expiryTime)

@@ -13,7 +13,6 @@
 <body>
     <div id="container" class = 'pos-relative'>
 
-        <!----------------------------------------Nav Bar--------------------------------->
 
         <div class="nav-bar">
             <div class="leftSide">
@@ -36,7 +35,7 @@
                         <div class="singleDropDown givePMS bor-bottom">
                             <p>Cấp quyền khai báo</p>
                         </div>
-                        <a href="https://google.com">
+                        <a href="https://google.com" class="addInfoCitizen">
                             <div class="singleDropDown bor-bottom">
                                 <p>Thêm thông tin người dân</p>
                             </div>
@@ -93,7 +92,8 @@
                     <div class="singleDropDown bor-bottom givePMS">
                         <p>Cấp quyền khai báo</p>
                     </div>
-                    <a href="https://google.com">
+                    {{!-- Sửa --}}
+                    <a href="https://google.com" class="addInfoCitizen">
                     <div class="singleDropDown bor-bottom">
                         <p>Thêm thông tin người dân</p>
                     </div>
@@ -125,7 +125,6 @@
             </div>
         </div>
 
-        <!-------------------------------------Update Info------------------------------------------>
 <div class = 'update-modal modal'>
         <div class="updateInfoTable table">
             <div class="header-updateInfo">
@@ -156,7 +155,6 @@
             </form>
         </div>
 </div>
-<!-----------------------------------Register Account-------------------------------------------->
 <div class="register-modal modal">
     <div class="registerTable table">
         <div class="header-updateInfo">
@@ -171,7 +169,7 @@
             </div>
             <div class="singleUpdateInfo">
                 <label class = "leftSide-Label" for="">Tài khoản</label>
-                <input type="text" class = "username-register" value = "" disabled>
+                <input type="text" class = "username-register" disabled>
             </div>
             <div class="singleUpdateInfo">
                 <label class = "leftSide-Label" for="registerPassword">Mật khẩu</label>
@@ -189,7 +187,6 @@
     </div>
 </div>
 
-<!-----------------------------------give ID to Province/district/....-------------------------------------------------->
 <div class="giveId-modal modal">
     <div class="giveIdTable table">
         <div class="header-updateInfo">
@@ -213,19 +210,18 @@
         </div>
 </div>
 
-<!---------------------------------------------give Permission to declare Info ---------------------------------------->
 <div class="givePMS-modal modal">
     <div class="givePMSTable table">
         <div class="header-updateInfo">
             <p>Cấp quyền khai báo<span class = "cancelGivePMS"><i class="fas fa-times"></i></span></p>
          </div>
          <form action="" class = "register-Form">
-             <div class = "singleUpdateInfo dateAndTime">
+             <div class = "singleUpdateInfo dateAndTime belowA1">
                 <label class = "leftSide-Label">Thời gian bắt đầu tối thiểu</label>
                 <input type="time" class = "time-start-deadline" value = "07:00:00" disabled>
                 <input type="date" class = "date-start-deadline" value = "2020-02-20" disabled>
              </div>
-             <div class = "singleUpdateInfo dateAndTime">
+             <div class = "singleUpdateInfo dateAndTime belowA1">
                 <label class = "leftSide-Label">Thời gian kết thúc tối đa</label>
                 <input type="time" class = "time-end-deadline" value = "10:00:00" disabled>
                 <input type="date" class = "date-end-deadline" value = "2021-03-20" disabled>
@@ -255,41 +251,6 @@
     </div>
 </div>
 
-<!---------------------------------------List people sent by B2-------------------------------------->
-<!--<div class="ppSentByB2-modal modal">
-    <div class = "ppSentByB2Table table">
-    <div class="ppSentByB2List">
-        <div class="header-updateInfo">
-            <p>Danh sách người dân do B2 cung cấp<span class = "closeListPPSentByB2"><i class="fas fa-times"></i></span></p>
-         </div>
-         <div class="list-header main fw-bold dis-flex wait-for-confirmation">
-            <div class="c-1-info r-1 bor-right-2 stt">
-                STT
-            </div>
-            <div class="c-2-info r-1 bor-right-2 mainLowLevelName">
-                <p>Họ và tên<p>
-            </div>
-            <div class="c-3-info r-1 bor-right-2 status">
-                Giới tính
-            </div>
-            <div class="c-4-info r-1 bor-right-2 status">
-                Ngày sinh
-            </div>
-            <div class="c-5-info r-1 population">
-                Nghề nghiệp
-            </div>
-            <div class="c-6-info r-1 village-id">
-                Village id
-            </div>
-        </div>
-        </div>
-        <div class="updateInfo-Button">
-            <button type = 'submit'>DUYỆT</button>
-        </div>
-    </div>
-</div>
-
-<!------------------------------Given ID modal---------------------------------->
 <div class="givenId-modal modal">
     <div class="givenIdTable table">
         <div class="header-updateInfo">
@@ -314,8 +275,6 @@
     </div>
 </div>
 
--->
-<!--------------------------------Warning alert modal--------------------------->
 <div class="warning-modal modal">
     <div class="warningTable table">
         <div class="header-updateInfo">
@@ -331,7 +290,6 @@
     </div>
 </div>
 
-<!----------------------------------given permission modal-------------------------------------->
 <div class="givenPMS-modal modal">
     <div class="givenPMSTable table">
         <div class="header-updateInfo">
@@ -463,6 +421,14 @@
                 </div>
             </div>
         </div>
+        <div class="updateInfo-Button belowB1Button" style = "display: none">
+            <button type = 'submit' class = "completeButton">HOÀN TẤT NHẬP</button>
+        </div>
+        <div class="updateInfo-Button belowB1Button" style = "display: none">
+            <a href="/public/citizenDoc.doc" download>
+            <button type = 'submit'>Tải xuống phiếu</button>
+            </a>
+        </div>
     </div>
 
 
@@ -503,10 +469,10 @@
             
         </div>
     </div>
-    <div class="updateInfo-Button completeButton">
-        <button type = 'submit'>HOÀN TẤT NHẬP</button>
+    <div class="updateInfo-Button belowB1Button">
+        <button type = 'submit' class = "completeButton">HOÀN TẤT NHẬP</button>
     </div>
-    <div class="updateInfo-Button">
+    <div class="updateInfo-Button belowB1Button">
         <a href="/public/citizenDoc.doc" download>
         <button type = 'submit'>Tải xuống phiếu</button>
         </a>

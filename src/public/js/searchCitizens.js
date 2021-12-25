@@ -144,72 +144,14 @@ function addInfoCitizen(stt, name, gender, dob, job, villageId, href) {
     $('.main-web-info').append(main);
 }
 
-$('.submit-id-button').click((e) => {
-    e.preventDefault();
-    // data cho fetch
-    var name = $('.give-id-name').val();
-    var id = $('.give-id-id').val();
-    // --------- //
-    if(name.length > 0 && id.length >1) {
-    $('.alert-text').text("Đã cấp mã thành công cho " + name + " với mã: " + id);
-    $('.alert-modal').show();
-    } else {
-        $('.invalid-text').html("Mã cấp không hợp lệ hoặc tỉnh này đã được cấp mã!");
-        $('.invalid-modal').show();
-    }
-})
-
-$('.register-button').click((e) => {
-    e.preventDefault();
-    var name = $('.select-name-register').val();
-    var username = $('.username-register').val();
-    var password = $('.password-register').val(); 
-    var confirmPassword = $('.confirmPassword-register').val();
-    if( password === confirmPassword && password.length >= 6) {
-    $('.alert-text').html("Đã cấp thành công tài khoản cho " + name + "<br/>"+ "Tài khoản: " + username +  "<br />" + "Mật khẩu: " + password);
-    $('.alert-modal').show();
-    //biến username là tài khoản
-    //biến password là mật khẩu
-    } else if (password.length < 6) {
-        $('.invalid-text').text("Mật khẩu phải có độ dài lớn 6!");
-        $('.invalid-modal').show();
-    } else if (password !== confirmPassword) {
-        $('.invalid-text').text("Mật khẩu và xác nhận mật khẩu không khớp!");
-    }
-
-})
-
-$('.givePMSButton').click((e) => {
-    e.preventDefault();
-    var name = $(".select-give-PMS").val();
-    var time_start = $('.time-start').val();
-    var date_start = $('.date-start').val();
-    var time_end = $('.time-end').val();
-    var date_end = $('.date-end').val();
-    var time_start_deadline = $('.time-start-deadline').val();
-    var date_start_deadline = $('.date-start-deadline').val();
-    var time_end_deadline = $('.time-end-deadline').val();
-    var date_end_deadline = $('.date-end-deadline').val();
-    var isValidate = validateTime(time_start, date_start, time_end, date_end, time_start_deadline, date_start_deadline, time_end_deadline, date_end_deadline);
-    if(isValidate) {
-        // data cho fetch
-        var date_and_time_start = date_start + " " + time_start;
-        var date_and_time_end = date_end + " " + time_end;
-        var id = $('.select-give-PMS').find('option:selected').attr('data-id');
-        // ----------
-        date_start = modifyDate(date_start);
-        date_end = modifyDate(date_end);
-        $('.alert-text').html("Đã cấp thành công thời gian khai báo cho " + name + "<br/> Thời gian bắt đầu: " + time_start + ", ngày "+ date_start + "<br/> Thời gian kết thúc: " + time_end +", ngày "+ date_end);
-        $('.alert-modal').show();
-    } else {
-        $('.invalid-text').html("Thời gian bạn nhập không hợp lệ!");
-        $('.invalid-modal').show();
-    }
-
-
-})
-
-function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+async function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+    await fetch('http://localhost:5000/get_info/user_info')
+        .then(data => data.json())
+        .then(user => {
+            if (user.role === 'A1') {
+                return true;
+            }
+        })
     if (dateStart > dateEnd
         || dateStart < dateStartDL
         ||  dateEnd > dateEndDL
@@ -239,7 +181,12 @@ function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateS
 }
 
 $('.confirmButton').click(() => {
-    $('.alert-modal').hide();
+    $('.confirmedButton').click(() => {
+        fetch('http://localhost:5000/information/declaringDone', {
+            method: 'POST'
+        })
+        $('.warning-modal').hide();
+    })
 })
 
 hideAndShow('.announce-modal','','.announce-confirm-button');
@@ -255,42 +202,20 @@ function modifyDate (date) {
 
 
 // Hàm để thêm value vào phần cấp tài khoản
-function addValueToSelectTag(tag,name, id) {
+function addValueToSelectTag(tag, name, id) {
     var nameOption = $("<option></option>").text(name);
     nameOption.attr("value", name);
     nameOption.attr("data-id", id);
     $(tag).append(nameOption);
 }
 
-addValueToSelectTag('.select-name-register', "thanh hóa", '11');
+//http://localhost:5000/get_info/user_info
 
 // Hàm để lắng nghe mỗi khi thẻ select thay đổi thì thẻ value của thẻ input cũng thay đổi
 $('.select-name-register').on('change', () => {
     var x = $('.select-name-register').find('option:selected').attr('data-id');
     $('.username-register').val(x);
 })
-
-$('.submit-update-info-button').click((e) => {
-    e.preventDefault();
-    var oldPassword = $('.oldPassword').val();
-    var newPassword = $('.newPassword').val();
-    var confirmNewPassword = $('.confirmNewPassword').val();
-    if (newPassword === confirmNewPassword && 1/* password dung' */ && newPassword.length >=6) {
-        $('.alert-text').html("Đã đổi mật khẩu thành công!");
-        $('.alert-modal').show();
-        var username = $('.userName').val();
-    } else if (newPassword !== confirmNewPassword) {
-        $('.invalid-text').html("Mật khẩu mới và nhập lại mật khẩu không khớp!");
-        $('.invalid-modal').show();
-    } else if (0 /* Password cũ sai */) {
-        $('.invalid-text').html("Mật khẩu cũ không đúng");
-        $('.invalid-modal').show();
-    } else if (newPassword.length < 6) {
-        $('.invalid-text').html("Mật khẩu phải có tối thiểu 6 kí tự!");
-        $('.invalid-modal').show();
-    }
-})
-
 
 function addProvidedAccount(stt, name, username) {
     var sttDiv = $("<div></div>").text(stt);
@@ -308,21 +233,258 @@ function addProvidedAccount(stt, name, username) {
     $('.mainTable').append(main);   
 }
 
-for (var i = 0; i < 50; i++) {
-    addProvidedAccount(i, 'name',1);
-}
 
 hideAndShow('.providedAccount-modal', '.showTable-button', '.confirmProvidedButton');
+hideAndShow('.alert-modal','','.alert-confirm-button');
 $('.showTable-button').click((e) => {
     e.preventDefault();
 })
 
-// const url = window.location.href.slice(0, 30);
-// fetch('http://localhost:5000/get_info/get_info_by_search')
+// Tùng sửa
 
-//     .then(data => data.json())
-//     .then(citizens => {
-//         citizens.forEach(citizen => {
-//             addInfoCitizen(citizen.citizen_id, citizen.citizen_name, citizen.citizen_gender, citizen.date_of_birth, citizen.occupation, citizen.citizen_nationality);
-//         });
-//     })
+$('.submit-update-info-button').click((e) => {
+    e.preventDefault();
+    const oldPassword = $('.oldPassword').val();
+    const newPassword = $('.newPassword').val();
+    const confirmNewPassword = $('.confirmNewPassword').val();
+    if (newPassword === confirmNewPassword && 1/* password dung' */ && newPassword.length >=6) {
+        fetch('http://localhost:5000/set_password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                    confirmNewPassword: confirmNewPassword
+            })
+        })
+        .then(data => data.json())
+        .then(response => {
+            if (response.error) {
+                $('.alert-text').html(response.msg);
+                $('.alert-modal').show();
+            }
+            else {
+                $('.alert-text').html("Đã đổi mật khẩu thành công!");
+                $('.alert-modal').show();
+            }
+        })
+        var username = $('.userName').val();
+    } else if (newPassword !== confirmNewPassword) {
+        $('.invalid-text').html("Mật khẩu mới và nhập lại mật khẩu không khớp!");
+        $('.invalid-modal').show();
+    } else if (0 /* Password cũ sai */) {
+        $('.invalid-text').html("Mật khẩu cũ không đúng");
+        $('.invalid-modal').show();
+    } else if (newPassword.length < 6) {
+        $('.invalid-text').html("Mật khẩu phải có tối thiểu 6 kí tự!");
+        $('.invalid-modal').show();
+    }
+})
+
+
+
+// for (var i = 0; i < 50; i++) {
+//     addProvidedAccount(i, 'name',1);
+// }
+
+
+function hideTimeDeadline() {
+    $('.belowA1').hide();
+}
+
+fetch('http://localhost:5000/get_info/user_info')
+.then(data => data.json())
+.then(user => {
+    if (user.role === 'A1') {
+        hideAddInfoCitizen();
+        hideTimeDeadline();
+        fetch('http://localhost:5000/get_info/get_info_levels/city')
+            .then(data => data.json())
+            .then(cities => {
+                cities.forEach((city, index) => {
+                    addValueToSelectTag('.select-name-register', city.name, city.city_id);
+                    addValueToSelectTag('.select-give-PMS', city.name, city.city_id);
+                    addGivenId(index + 1, city.name, city.city_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
+                })
+            })
+    }
+    else if (user.role === 'A2') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(districts => {
+                districts.forEach((district, index) => {
+                    addValueToSelectTag('.select-name-register', district.name, district.district_id);
+                    addValueToSelectTag('.select-give-PMS', district.name, district.district_id);
+                    addGivenId(index + 1, district.name, district.district_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
+                })
+            })
+    }
+    else if (user.role === 'A3') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(wards => {
+                wards.forEach((ward, index) => {
+                    addValueToSelectTag('.select-name-register', ward.name, ward.ward_id);
+                    addValueToSelectTag('.select-give-PMS', ward.name, ward.ward_id);
+                    addGivenId(index + 1, ward.name, ward.ward_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
+                })
+            })
+    }
+    else if (user.role === 'B1') {
+        showBelowB1Button();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(villages => {
+                villages.forEach((village, index) => {
+                    addValueToSelectTag('.select-name-register', village.name, village.village_id);
+                    addValueToSelectTag('.select-give-PMS', village.name, village.village_id);
+                    addGivenId(index + 1, village.name, village.village_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
+                })
+            })
+    }
+    else if (user.role === 'B2') {
+        hideFunctionB2();
+    }
+})
+
+// Thêm vào bảng đã cấp quyền
+function addGivenPMS(stt, name, dateAndTimeStart, dateAndTimeEnd) {
+    var sttDiv = $("<div></div>").text(stt);
+    var nameDiv = $("<div></div").text(name);
+    var startDiv = $("<div></div>").text(dateAndTimeStart);
+    var endDiv = $("<div></div>").text(dateAndTimeEnd);
+    var main = $('<div></div>');
+    sttDiv.addClass("c-1-gp bor-right-2");
+    nameDiv.addClass("c-2-gp bor-right-2");
+    startDiv.addClass("c-3-gp bor-right-2");
+    endDiv.addClass("c-4-gp");
+    if (stt % 2 == 1) {
+        main.addClass('odd-line');
+    }
+    main.addClass("dis-flex main");
+    main.append(sttDiv,nameDiv,startDiv,endDiv);
+    $('.mainGivenPMSTable').append(main);   
+}
+
+function modifyTimeDeadline(dateAndTimeStart, dateAndTimeEnd) {
+    var timeStart = dateAndTimeStart.slice(11, 19);
+    var dateStart = dateAndTimeStart.slice(0,10);
+    var timeEnd = dateAndTimeEnd.slice(11, 19);
+    var dateEnd = dateAndTimeEnd.slice(0,10);
+    $('.time-start-deadline').val(timeStart);
+    $('.date-start-deadline').val(dateStart);
+    $('.time-end-deadline').val(timeEnd);
+    $('.date-end-deadline').val(dateEnd);
+}
+ 
+// test modify Time deadline
+// var timeStartTest = "2021-09-20 11:59:00";
+// var timeEndTest = "2021-11-20 11:58:00";
+
+function modifyDeadline(timeStart, timeEnd) {
+    $('.time_start').text(timeStart);
+    $('.time_end').text(timeEnd);
+}
+
+function onAnnounce() {
+    $('.announce').show();
+}
+
+fetch('http://localhost:5000/get_info/user_info')
+    .then(data => data.json())
+    .then(user => {
+        // yyyy/mm/ddT08:
+        // "2021-12-31T08:01:03.000Z"   expiry
+        // "2021-12-01T08:01:00.000Z"   start
+        if (user.startTime === 'Invalid date' || user.expiryTime === 'Invalid date') {
+            // 2021-12-24 15:36:21
+            user.startTime = "0000-00-00 00:00:00";
+            user.expiryTime = "0000-00-00 00:00:00";
+            modifyTimeDeadline(user.startTime, user.expiryTime);
+        }
+        else {
+            onAnnounce();
+            modifyDeadline(user.startTime, user.expiryTime);
+            modifyTimeDeadline(user.startTime, user.expiryTime);
+        }
+    })
+
+
+// statistics
+function addInfoToStatistic(total, male, female, upperAge, inAge, underAge) {
+    $(".total-population").text(total);
+    $(".male-citizens").text(male);
+    $(".female-citizens").text(female);
+    $(".upperLabourAge").text(upperAge);
+    $(".inLabourAge").text(inAge);
+    $(".underLabourAge").text(underAge);
+}
+
+
+
+$('.listGivenPMSButton').click((e) => {
+    e.preventDefault();
+})
+ 
+hideAndShow('.givenPMS-modal','.listGivenPMSButton','.confirmGivenPMSButton');
+
+function addGivenId(stt, name, id) {
+    var sttDiv = $("<div></div>").text(stt);
+    var nameDiv = $("<div></div").text(name);
+    var idDiv = $("<div></div>").text(id);
+    var main = $('<div></div>');
+    sttDiv.addClass("c-1-ac bor-right-2");
+    nameDiv.addClass("c-2-ac bor-right-2");
+    idDiv.addClass("c-3-ac");
+    if (stt % 2 == 1) {
+        main.addClass('odd-line');
+    }
+    main.addClass("dis-flex main");
+    main.append(sttDiv,nameDiv,idDiv);
+    $('.mainGivenIdTable').append(main);   
+}
+
+$('.listGivenIdButton').click((e) => {
+    e.preventDefault();
+})
+
+hideAndShow('.givenId-modal','.listGivenIdButton','.confirmGivenIdButton')
+
+
+function modifyCurrentLevelName(name) {
+    $('.currentLevelName').text(name);
+}
+ 
+$('.button-search').click((e)=> {
+    e.preventDefault();
+    var value = $('.input-search').val();
+    $('.search-form').attr("action", `http://localhost:5000/get_info/get_info_by_search/${value}`);
+	$('.search-form').submit();
+})
+
+function showBelowB1Button() {
+    $('.belowB1Button').show();
+}
+ 
+function hideAddInfoCitizen() {
+    $('.addInfoCitizen').hide();
+}
+
+function hideFunctionB2() {
+    $('.givePMS').hide();
+    $('.giveId').hide();
+    $('.giveAccount').hide();
+    $('.manageDropDownMenu').css('margin-top','16px')
+}

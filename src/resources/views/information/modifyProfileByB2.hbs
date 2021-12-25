@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CitizenV</title>
+    <link rel="stylesheet" href="../../css/profile.css">
+</head>
+<body>
+    {{#with citizen}}
+    <div id="container">
+        <div class="flexs">
+            Thông Tin Công Dân
+        </div>
+        <div class="flexs">
+            <label>Họ và Tên</label>
+            <br>
+            <input type="text" value="{{citizen_name}}">
+        </div>
+        <div class="flexs">
+            <label>Ngày sinh</label>
+            <br>
+            <input type="date" value="{{date_of_birth}}">
+        </div>
+        <div class="flexs">
+            <label>Giới tính</label>
+            <br>
+            <select>
+                <option value="{{citizen_gender}}" selected hidden disabled>{{citizen_gender}}</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+        </div>
+        <div class="flexs">
+            <label>CMND</label>
+            <br>
+            <input type="text" value="{{citizen_id}}">
+        </div>
+        <div class="flexs">
+            <label>Quê Quán</label>
+            <br>
+            <input type="text" value="{{hometown}}">
+        </div>
+        <div class="flexs">
+            <label>Địa chỉ thường trú</label>
+            <br>
+            <input type="text" value="{{permanent_address}}">
+        </div>
+        <div class="flexs">
+            <label>Địa chỉ tạm trú</label>
+            <br>
+            <input type="text" value="{{temporary_address}}">
+        </div>
+        <div class="flexs">
+            <label>Tôn giáo</label>
+            <br>
+            <select id="tongiao">
+                <option value={{ethnic_id}} selected hidden disabled>{{ethnic_group}}</option>
+            </select>
+        </div>
+        <div class="flexs">
+            <label>Trình độ văn hóa</label>
+            <br>
+            <input type="text" value="{{educational_level}}">
+        </div>
+        <div class="flexs">
+            <label>Nghề Nghiệp</label>
+            <br>
+            <input type="text" value="{{occupation}}"> 
+        </div>
+        <div class="flexs" id="chinhsua">
+            <button type="button" onclick="chinhsua(this)" id="save">
+                Nộp
+            </button>
+            <button type="button" onclick="xoa(this)">
+                Xóa
+            </button>
+        </div>
+    </div>
+    <div id="notify">
+        <div>Thông Báo</div>
+        <div id="textnotify">
+        </div>
+        <button type="button" id="okee" onclick="okefunc()">Oke</button>
+    </div>
+    {{/with}}
+    <script src="../../js/modifyProfileByB2.js"></script>
+</body>
+</html>

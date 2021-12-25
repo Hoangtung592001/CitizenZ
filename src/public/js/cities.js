@@ -149,7 +149,14 @@ for(var i = 0; i < 99; i++) {
     //addInfoCitizenByB2(i, 'Lê Công Nam', 'Nam', '01/02/2001', 'IT','1','https://google.com');
 }
 
-function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+async function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateStartDL, timeEndDL, dateEndDL) {
+    await fetch('http://localhost:5000/get_info/user_info')
+        .then(data => data.json())
+        .then(user => {
+            if (user.role === 'A1') {
+                return true;
+            }
+        })
     if (dateStart > dateEnd
         || dateStart < dateStartDL
         ||  dateEnd > dateEndDL
@@ -179,7 +186,12 @@ function validateTime(timeStart, dateStart, timeEnd, dateEnd, timeStartDL, dateS
 }
 
 $('.confirmButton').click(() => {
-    $('.alert-modal').hide();
+    $('.confirmedButton').click(() => {
+        fetch('http://localhost:5000/information/declaringDone', {
+            method: 'POST'
+        })
+        $('.warning-modal').hide();
+    })
 })
 
 hideAndShow('.announce-modal','','.announce-confirm-button');
@@ -246,71 +258,70 @@ $('.givePMSButton').click((e) => {
     var time_end_deadline = $('.time-end-deadline').val();
     var date_end_deadline = $('.date-end-deadline').val();
     var isValidate = validateTime(time_start, date_start, time_end, date_end, time_start_deadline, date_start_deadline, time_end_deadline, date_end_deadline);
-    console.log($('.select-give-PMS').children('option:selected').attr('data-id'));
-    // if(isValidate) {
-    //     // data cho fetch
-    //     const date_and_time_start = date_start + " " + time_start + ":00";
-    //     const date_and_time_end = date_end + " " + time_end + ":00";
-    //     const id = $('.select-give-PMS').children('option:selected').attr('data-id');
-    //     // ----------
-    //     date_start = modifyDate(date_start);
-    //     date_end = modifyDate(date_end);
-    //     fetch('http://localhost:5000/get_info/user_info')
-    //         .then(data => data.json())
-    //         .then(user => {
-    //             if (user.role === 'A1') {
-    //                 fetch('http://localhost:5000/level/grant_privileges_cities', {
-    //                     method: 'POST',
-    //                     headers: {
-    //                         'Content-Type': 'application/json'
-    //                     },
-    //                     body: JSON.stringify({
-    //                         unitId: id,
-    //                         startTime: date_and_time_start,
-    //                         expiryTime: date_and_time_end
-    //                     })
-    //                 })
-    //                 .then(data => data.json())
-    //                 .then(response => {
-    //                     if (response.error) {
-    //                         $('.alert-text').html(response.msg);
-    //                         $('.alert-modal').show();
-    //                     }
-    //                     else {
-    //                         $('.alert-text').html("Đã cấp thành công thời gian khai báo cho " + name + "<br/> Thời gian bắt đầu: " + time_start + ", ngày "+ date_start + "<br/> Thời gian kết thúc: " + time_end +", ngày "+ date_end);
-    //                         $('.alert-modal').show();
-    //                     }
-    //                 })
-    //             }
-    //             else {
-    //                 fetch('http://localhost:5000/level/grant_privileges_below', {
-    //                     method: 'POST',
-    //                     headers: {
-    //                         'Content-Type': 'application/json'
-    //                     },
-    //                     body: JSON.stringify({
-    //                         unitId: id,
-    //                         startTime: date_and_time_start,
-    //                         expiryTime: date_and_time_end
-    //                     })
-    //                 })
-    //                 .then(data => data.json())
-    //                 .then(response => {
-    //                     if (response.error) {
-    //                         $('.alert-text').html(response.msg);
-    //                         $('.alert-modal').show();
-    //                     }
-    //                     else {
-    //                         $('.alert-text').html("Đã cấp thành công thời gian khai báo cho " + name + "<br/> Thời gian bắt đầu: " + time_start + ", ngày "+ date_start + "<br/> Thời gian kết thúc: " + time_end +", ngày "+ date_end);
-    //                         $('.alert-modal').show();
-    //                     }
-    //                 })
-    //             }
-    //         })
-    // } else {
-    //     $('.invalid-text').html("Thời gian bạn nhập không hợp lệ!");
-    //     $('.invalid-modal').show();
-    // }
+    if(isValidate) {
+        // data cho fetch
+        const date_and_time_start = date_start + " " + time_start + ":00";
+        const date_and_time_end = date_end + " " + time_end + ":00";
+        const id = $('.select-give-PMS').children('option:selected').attr('data-id');
+        // ----------
+        date_start = modifyDate(date_start);
+        date_end = modifyDate(date_end);
+        fetch('http://localhost:5000/get_info/user_info')
+            .then(data => data.json())
+            .then(user => {
+                if (user.role === 'A1') {
+                    fetch('http://localhost:5000/level/grant_privileges_cities', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            unitId: id,
+                            startTime: date_and_time_start,
+                            expiryTime: date_and_time_end
+                        })
+                    })
+                    .then(data => data.json())
+                    .then(response => {
+                        if (response.error) {
+                            $('.alert-text').html(response.msg);
+                            $('.alert-modal').show();
+                        }
+                        else {
+                            $('.alert-text').html("Đã cấp thành công thời gian khai báo cho " + name + "<br/> Thời gian bắt đầu: " + time_start + ", ngày "+ date_start + "<br/> Thời gian kết thúc: " + time_end +", ngày "+ date_end);
+                            $('.alert-modal').show();
+                        }
+                    })
+                }
+                else {
+                    fetch('http://localhost:5000/level/grant_privileges_below', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            unitId: id,
+                            startTime: date_and_time_start,
+                            expiryTime: date_and_time_end
+                        })
+                    })
+                    .then(data => data.json())
+                    .then(response => {
+                        if (response.error) {
+                            $('.alert-text').html(response.msg);
+                            $('.alert-modal').show();
+                        }
+                        else {
+                            $('.alert-text').html("Đã cấp thành công thời gian khai báo cho " + name + "<br/> Thời gian bắt đầu: " + time_start + ", ngày "+ date_start + "<br/> Thời gian kết thúc: " + time_end +", ngày "+ date_end);
+                            $('.alert-modal').show();
+                        }
+                    })
+                }
+            })
+    } else {
+        $('.invalid-text').html("Thời gian bạn nhập không hợp lệ!");
+        $('.invalid-modal').show();
+    }
 })
 
 $('.submit-update-info-button').click((e) => {
@@ -430,52 +441,71 @@ $('.submit-id-button').click((e) => {
         $('.invalid-modal').show();
     }
 })
+function hideTimeDeadline() {
+    $('.belowA1').hide();
+}
 
 fetch('http://localhost:5000/get_info/user_info')
-    .then(data => data.json())
-    .then(user => {
-        console.log(user);
-        if (user.role === 'A1') {
-            fetch('http://localhost:5000/city')
-                .then(data => data.json())
-                .then(cities => {
-                    cities.forEach((city, index) => {
-                        addValueToSelectTag('.select-name-register', city.name, city.city_id);
-                        addValueToSelectTag('.select-give-PMS', city.name, city.city_id);
-                        addGivenId(index + 1, city.name, city.city_id);
-                        const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
-                        $('.username-register').val(defaultValueRegister);
-                    })
+.then(data => data.json())
+.then(user => {
+    if (user.role === 'A1') {
+        hideAddInfoCitizen();
+        hideTimeDeadline();
+        fetch('http://localhost:5000/get_info/get_info_levels/city')
+            .then(data => data.json())
+            .then(cities => {
+                cities.forEach((city, index) => {
+                    addValueToSelectTag('.select-name-register', city.name, city.city_id);
+                    addValueToSelectTag('.select-give-PMS', city.name, city.city_id);
+                    addGivenId(index + 1, city.name, city.city_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'A2') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(districts => {
-                    districts.forEach(district => {
-                        addValueToSelectTag('.select-name-register', district.name, district.district_id);
-                    })
+            })
+    }
+    else if (user.role === 'A2') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(districts => {
+                districts.forEach((district, index) => {
+                    addValueToSelectTag('.select-name-register', district.name, district.district_id);
+                    addValueToSelectTag('.select-give-PMS', district.name, district.district_id);
+                    addGivenId(index + 1, district.name, district.district_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'A3') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(wards => {
-                    wards.forEach(ward => {
-                        addValueToSelectTag('.select-name-register', ward.name, ward.ward_id);
-                    })
+            })
+    }
+    else if (user.role === 'A3') {
+        hideAddInfoCitizen();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(wards => {
+                wards.forEach((ward, index) => {
+                    addValueToSelectTag('.select-name-register', ward.name, ward.ward_id);
+                    addValueToSelectTag('.select-give-PMS', ward.name, ward.ward_id);
+                    addGivenId(index + 1, ward.name, ward.ward_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-        else if (user.role === 'B1') {
-            fetch(`http://localhost:5000/${user.username}`)
-                .then(data => data.json())
-                .then(villages => {
-                    villages.forEach(village => {
-                        addValueToSelectTag('.select-name-register', village.name, village.village_id);
-                    })
+            })
+    }
+    else if (user.role === 'B1') {
+        showBelowB1Button();
+        fetch(`http://localhost:5000/get_info/get_info_levels/${user.username}`)
+            .then(data => data.json())
+            .then(villages => {
+                villages.forEach((village, index) => {
+                    addValueToSelectTag('.select-name-register', village.name, village.village_id);
+                    addValueToSelectTag('.select-give-PMS', village.name, village.village_id);
+                    addGivenId(index + 1, village.name, village.village_id);
+                    const defaultValueRegister = $('.select-name-register').children(":selected").attr("data-id");
+                    $('.username-register').val(defaultValueRegister);
                 })
-        }
-    })
+            })
+    }
+})
 
 // Thêm vào bảng đã cấp quyền
 function addGivenPMS(stt, name, dateAndTimeStart, dateAndTimeEnd) {
@@ -568,7 +598,8 @@ $('.listGivenPMSButton').click((e) => {
 })
  
 hideAndShow('.givenPMS-modal','.listGivenPMSButton','.confirmGivenPMSButton');
- 
+hideAndShow('.alert-modal','','.alert-confirm-button');
+
  
 //khi người dùng ấn hoàn tất nhập
 $('.confirmedButton').click(() => {
@@ -621,6 +652,14 @@ $('.button-search').click((e)=> {
 	$('.search-form').submit();
 })
 
+function showBelowB1Button() {
+    $('.belowB1Button').show();
+}
+ 
+function hideAddInfoCitizen() {
+    $('.addInfoCitizen').hide();
+}
+
 // Trang cần đổi url
 
 const url = window.location.href.slice(0, 22) + 'city';
@@ -628,7 +667,7 @@ fetch(url)
     .then(data => data.json())
     .then(cities => {
         cities.forEach(city => {
-            addInfo(city.city_id, city.name, city.declaringDone ? 'Nhập liệu thành công!' : 'Đang nhập liệu!', city.population, `http://localhost:5000/${city.city_id}/city`);
+            addInfo(city.city_id, city.name, city.declaringDone ? 'Đang nhập liệu!' : 'Nhập liệu thành công!', city.population, `http://localhost:5000/${city.city_id}/city`);
         });
     })
 

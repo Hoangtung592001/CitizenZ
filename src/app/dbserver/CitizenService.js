@@ -153,7 +153,7 @@ class CitizenService {
                                 msg: 'Lỗi không tìm thấy người dùng!'
                             });
                         }
-                        if (!checkingUser.declaringDone) {
+                        if (checkingUser.declaringDone) {
                             resolve({
                                 error: true,
                                 msg: 'Tài khoản này bị khóa tất cả các quyền!'

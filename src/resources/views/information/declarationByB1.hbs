@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CitizenV</title>
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+
+    <div id="container">
+        <div class="flexs">
+            Thông Tin Công Dân
+        </div>
+        <div class="flexs">
+            <label>Họ và Tên</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Ngày sinh</label>
+            <br>
+            <input type="date">
+        </div>
+        <div class="flexs">
+            <label>Giới tính</label>
+            <br>
+            <select>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+        </div>
+        <div class="flexs">
+            <label>CMND</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Quê Quán</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Địa chỉ thường trú</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Địa chỉ tạm trú</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Tôn giáo</label>
+            <br>
+            <select id="tongiao">
+            </select>
+        </div>
+        <div class="flexs">
+            <label>Trình độ văn hóa</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Nghề Nghiệp</label>
+            <br>
+            <input type="text">
+        </div>
+        <div class="flexs">
+            <label>Làng bản</label>
+            <br>
+            <select id="lang">
+            </select>
+        </div>
+        <div class="flexs" id="chinhsua">
+            <button type="button" onclick="nop(this)" id="save">
+                Nộp
+            </button>
+        </div>
+    </div>
+    <div id="notify">
+        <div>Thông Báo</div>
+        <div id="textnotify">
+        </div>
+        <button type="button" id="okee" onclick="okefunc()">Oke</button>
+    </div>
+    <script src="../js/profileByB1.js"></script>
+</body>
+</html>
